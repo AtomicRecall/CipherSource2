@@ -40,7 +40,7 @@
     "tsconfig": "^7.0.0"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "15.3.4",
+    "@next/eslint-plugin-next": "^15.3.4",
     "@react-types/shared": "3.30.0",
     "@tailwindcss/postcss": "4.1.11",
     "@types/node": "20.5.7",
