@@ -252,7 +252,7 @@ export default function FuckWithProfile() {
                     <div className="text-5xl mr-2 -mt-1 ">
                         <Flag  countryCode={data.leagues[0].league_seasons_info[0].season_standings[0].region_name}></Flag>
                     </div>
-                    <p className="text-5xl font-bold text-white cursor-pointer hover:[text-shadow:0_0_8px_white]" onClick={OpenTeamName}>{data.teamdata?.name}</p>
+                    <p className="text-5xl font-bold text-white cursor-pointer hover:[text-shadow:0_0_8px_white]" >{data.teamdata?.name}</p>
                     <p className="text text-zinc-500 flex items-end px-1">({data.teamdata?.nickname})</p>
                     {/* leagues summary */}
                   <div className="ml-1">
@@ -348,7 +348,7 @@ export default function FuckWithProfile() {
                               height={40}
                               src={`/images/CAPTAIN.png`}
                               className="cursor-pointer rounded-none z-40"
-                              onClick={OpenPlayerName(member?.user_name)}
+                              
                             />
                           </div>
                           
@@ -362,7 +362,7 @@ export default function FuckWithProfile() {
                             src={member?.avatar_img !== "" ? member?.avatar_img : "/images/DEFAULT.jpg"}
                             alt={`${member?.user_name} logo`}
                             className="w-12 h-12 rounded-full hover:shadow-[0_0_8px_white]"
-                            onClick={OpenPlayerName(member?.user_name)}
+                            
                           />
                         </div>
 

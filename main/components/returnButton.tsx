@@ -1,4 +1,4 @@
-"use client"; // 👈 required for onClick + navigation
+"use client";
 
 import { useRouter } from "next/navigation";
 import "@/./public/src/returnButton.css";
@@ -7,12 +7,12 @@ export default function MenuButton() {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/home.html"); // 👈 always goes to /home
+    router.push("/home"); // ✅ no need for .html
   };
 
   return (
-    <div className="menu" onClick={handleClick}>
+    <button className="menu" onClick={handleClick} aria-label="Go to home">
       <span className="arrow">&larr;</span>
-    </div>
+    </button>
   );
 }

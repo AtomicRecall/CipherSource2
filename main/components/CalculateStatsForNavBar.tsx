@@ -35,6 +35,7 @@ export default function CalculateStats({ stats, isBo3, SelectedTeam }: Calculate
           radius={radius}
           height={size}
           width={size}
+          key={imgSrc}
           onError={() => setImgSrc("/images/DEFAULT.jpg")}
         />
       );
@@ -93,7 +94,7 @@ export default function CalculateStats({ stats, isBo3, SelectedTeam }: Calculate
                                         <div className="">
                                         {stats.matchData.rounds
                                           .map((map:any) => {return(<div>
-                                            <p className="text-xs text-black [text-shadow:0px_1px_2px_white] text-center font-bold underline">{map.round_stats.Score} </p>
+                                            <p key={map.round_stats.Score} className="text-xs text-black [text-shadow:0px_1px_2px_white] text-center font-bold underline">{map.round_stats.Score} </p>
                                           </div>)})
                                         }
                                         </div>
