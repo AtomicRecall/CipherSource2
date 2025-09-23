@@ -20,13 +20,16 @@ interface PieChartWithLegendProps {
 
 const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({ title, type, data }) => {
   const itemCount = data?.length ?? 0;
+  
+  // Ensure data is properly typed
+  const pieData: { id: string; label: string; value: string; color: string }[] = data || [];
 
   // small tweak: shrink a little when > 3 items
   const legendFontSize = itemCount > 5 ? 13 : 20; // px
   const swatchSize = itemCount > 5 ? 12 : 16; // px
 
-  const commonProperties: Partial<PieSvgProps> = {
-  data,
+  const commonProperties: Partial<PieSvgProps<{ id: string; label: string; value: string; color: string }>> = {
+  data: pieData,
   margin: { top: 40, right: 40, bottom: 60, left: 40 },
   innerRadius: 0.6,
   padAngle: 0.5,
@@ -52,11 +55,11 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({ title, type, da
     <div className="flex flex-col items-center" style={{ width: 420, minWidth: 400 }}>
       <h2 className="text-white text-lg font-bold">{title}</h2>
       <div style={{ height: 300, width: "130%" }} className="-mt-6">
-        <ResponsivePie {...commonProperties} />
+        <ResponsivePie {...(commonProperties as any)} />
       </div>
       <div className="flex flex-col gap-2 text-white -mt-9">
-  {data
-    .slice() // create a shallow copy so the original data isn’t mutated
+  {pieData
+    .slice() // create a shallow copy so the original data isn't mutated
     .sort((a:any, b:any) => b.value - a.value) // descending order (largest → smallest)
     .map((slice) => (
       <div key={slice.id} className="flex items-center gap-2">

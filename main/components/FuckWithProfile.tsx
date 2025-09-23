@@ -396,8 +396,8 @@ export default function FuckWithProfile() {
                       .slice()
                       .sort((a:any, b:any) => {
                         if (!React.isValidElement(a) || !React.isValidElement(b)) return 0;
-                        const aNum = parseInt((a.props.id as string).split(" ")[0].slice(1), 10);
-                        const bNum = parseInt((b.props.id as string).split(" ")[0].slice(1), 10);
+                        const aNum = parseInt(((a as any).props.id as string).split(" ")[0].slice(1), 10);
+                        const bNum = parseInt(((b as any).props.id as string).split(" ")[0].slice(1), 10);
                         return bNum - aNum;
                       })}
                     </ScrollShadow>}
