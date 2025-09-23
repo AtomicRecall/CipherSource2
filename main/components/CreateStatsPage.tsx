@@ -133,26 +133,31 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({ title, type, da
 
 // Function to reset all global arrays
 export function resetGlobalArrays() {
-  Played = [];
-  W = [];
-  L = [];
-  Banned = [];
-  bo1Banned = [];
-  BO3Banned = [];
-  BO3Picked = [];
-  bo1FirstBan = [];
-  bo1SecondBan = [];
-  bo1ThirdBan = [];
-  bo1Played = [];
-  bo1Won = [];
-  bo1Lost = [];
-  bo1Pick = [];
-  bo3Played = [];
-  bo3FirstPick = [];
-  bo3SecondPick = [];
-  bo3ThirdPick = [];
-  bo3FirstBan = [];
-  bo3SecondBan = [];
+
+  Played=[];
+  W=[];
+  L=[];
+  Banned=[];
+  Picks=[];
+  FirstBan=[];
+  SecondBan=[];
+  ThirdBan=[];
+  BO3Picked=[];
+  bo3FirstPick=[];
+  bo3SecondPick=[];
+  bo3ThirdPick=[];
+  bo3FirstBan=[];
+  bo3SecondBan=[];
+  bo1Banned=[];
+  bo1FirstBan=[];
+  bo1SecondBan=[];
+  bo1ThirdBan=[];
+  bo1Pick=[];
+  bo1Played=[];
+  bo3Played=[];
+  bo1Won=[];
+  bo1Lost=[];
+  bo3Won= [];
 }
 // Returns a color based on the map name
 function whatColor(mapname: string): string {
@@ -217,31 +222,30 @@ function whatColor(mapname: string): string {
 function CreateStatsPage({ needsPlaceholder, stats, SelectedTeam, isLoading}: CreateStatsPageProps) {
   
   // Reset all global arrays at the start of each render to ensure fresh calculations
-  Played = [];
-  W = [];
-  L = [];
-  bo1Banned = [];
-  Picks = [];
-  FirstBan = [];
-  SecondBan = [];
-  ThirdBan = [];
-  BO3Banned = [];
-  BO3Picked = [];
-  bo1FirstBan = [];
-  bo1SecondBan = [];
-  bo1ThirdBan = [];
-  bo1Played = [];
-  bo1Won = [];
-  bo1Lost = [];
-  bo1Pick = [];
-  bo3FirstPick = [];
-  bo3SecondPick = [];
-  bo3ThirdPick = [];
-  bo3FirstBan = [];
-  bo3SecondBan = [];
-  bo3Played = [];
-  bo3Won = [];
-  bo3Lost = [];
+  Played=[];
+  W=[];
+  L=[];
+  Banned=[];
+  Picks=[];
+  FirstBan=[];
+  SecondBan=[];
+  ThirdBan=[];
+  BO3Picked=[];
+  bo3FirstPick=[];
+  bo3SecondPick=[];
+  bo3ThirdPick=[];
+  bo3FirstBan=[];
+  bo3SecondBan=[];
+  bo1Banned=[];
+  bo1FirstBan=[];
+  bo1SecondBan=[];
+  bo1ThirdBan=[];
+  bo1Pick=[];
+  bo1Played=[];
+  bo3Played=[];
+  bo1Won=[];
+  bo1Lost=[];
+  bo3Won= [];
     
   console.log("NO FUCKING WAY ",stats);
     
