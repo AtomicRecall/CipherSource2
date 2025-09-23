@@ -1,0 +1,26 @@
+.menu {
+  display: inherit;
+  background: #FF6900;
+  height: 60px;
+  width: 60px;
+  position:absolute;
+  border-radius: 2px;
+  margin-bottom: 3px;
+  transform: translate(-27%, -95%);
+  border-bottom-right-radius: 50%;
+  transition: 1s;
+}
+.arrow{
+    font-size: 45px;
+    font-weight: bold;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.menu:hover{
+    color: white;
+    background: rgba(83, 83, 83, 0.603);
+    cursor: pointer;
+}
