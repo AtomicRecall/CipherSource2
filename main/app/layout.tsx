@@ -1,11 +1,10 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
-import { Link } from "@heroui/link";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
+
 import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
 import { fontPlay } from "@/config/fonts";
 
 export const metadata: Metadata = {
@@ -31,12 +30,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
-
-    <html suppressHydrationWarning lang="en" className={`${fontPlay.variable} overflow-hidden`} >
+    <html
+      suppressHydrationWarning
+      className={`${fontPlay.variable} overflow-hidden`}
+      lang="en"
+    >
       <head>
-        <link rel="icon" href="favicon.ico" type="image/x-icon"></link>
+        <link href="favicon.ico" rel="icon" type="image/x-icon" />
       </head>
       <body
         className={clsx(
@@ -44,14 +45,9 @@ export default function RootLayout({
           fontPlay.variable,
         )}
       >
-        
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
-            <main className="container px-3 pt-6 flex-grow">
-              {children}
-            </main>
-            
-
+            <main className="container px-3 pt-6 flex-grow">{children}</main>
           </div>
         </Providers>
       </body>

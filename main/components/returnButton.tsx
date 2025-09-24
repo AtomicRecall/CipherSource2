@@ -11,7 +11,7 @@ export default function MenuButton() {
   };
 
   return (
-    <button className="menu" onClick={handleClick} aria-label="Go to home">
+    <button aria-label="Go to home" className="menu" onClick={handleClick}>
       <span className="arrow">&larr;</span>
     </button>
   );
