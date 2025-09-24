@@ -310,7 +310,7 @@ async function ClickSearch(event){
                     //FIX THIS SHIT LATER WHEN YOU ACTUALLY START PORT FORWARDING YOUR SERVER LOL
                     //window.location.href = `${window.location.origin}/?${team.team_id}`;
                     
-                    window.location.href = `http://localhost:3000/?${team.team_id}`;
+                    window.location.href = `${window.location.origin}?${team.team_id}`;
                 })
 
 
