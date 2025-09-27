@@ -10,7 +10,6 @@ import {
   DropdownItem,
   Button,
 } from "@heroui/react";
-import { ScrollShadow } from "@heroui/scroll-shadow";
 import { Card } from "@heroui/react";
 
 import CreateStatsPage from "./CreateStatsPage";
@@ -152,7 +151,7 @@ export default function FuckWithProfile() {
     }
 
     if (B4Size - curSize < 0) {
-      console.log("ADD");
+      console.log("ADD "+parseInt(keys.currentKey.substring(1, 3)));
       setNavLoading(true);
       for (const season of data.leagues[0].league_seasons_info) {
         if (season.season_number == parseInt(keys.currentKey.substring(1, 3))) {
@@ -178,11 +177,12 @@ export default function FuckWithProfile() {
             (a: any, b: any) =>
               b.teamMatchData.finished_at - a.teamMatchData.finished_at,
           );
-          setUiNode((prev) => [
-            ...prev,
+          if(B4Size == 0){
+            setUiNode((prev) => [
             <div
               key={`S${season.season_number}-${season.season_standings[0].division_name}`}
               id={`S${season.season_number} ${season.season_standings[0].division_name}`}
+              className=""
             >
               {CreateMatchNavbar(
                 GotAllMyShit,
@@ -191,11 +191,30 @@ export default function FuckWithProfile() {
               )}
             </div>,
           ]);
+          }
+          else{
+            setUiNode((prev) => [
+            ...prev,
+            <div
+              key={`S${season.season_number}-${season.season_standings[0].division_name}`}
+              id={`S${season.season_number} ${season.season_standings[0].division_name}`}
+              className=""
+            >
+              {CreateMatchNavbar(
+                GotAllMyShit,
+                data.teamdata.team_id,
+                season.season_standings,
+              )}
+            </div>,
+          ]);
+          }
+
 
           // Accumulate data when adding seasons
           setTeamData((prev: any) =>
             prev ? [...prev, ...GotAllMyShit] : GotAllMyShit,
           );
+          
           console.log("GOT ALL MY SHIT? ", GotAllMyShit);
           setNavLoading(false);
           setneedsPlaceholder(false);
@@ -515,7 +534,7 @@ export default function FuckWithProfile() {
                       </p>
                     </Card>
                   ) : (
-                    <ScrollShadow className="mt-1 w-70 h-154 overflow-y-scroll">
+                    <div className="mt-1 w-70 overflow-x-hidden">
                       {uiNode.slice().sort((a: any, b: any) => {
                         if (
                           !React.isValidElement(a) ||
@@ -537,19 +556,23 @@ export default function FuckWithProfile() {
 
                         return bNum - aNum;
                       })}
-                    </ScrollShadow>
+                    </div>
                   )}
+                   
+                  
                 </div>
               </>
             )}
-            <div id="FartSniffer">
+            <div id="FartSniffer" className="ml-1">
               <CreateStatsPage
                 SelectedTeam={data.teamdata?.team_id}
                 isLoading={navLoading}
                 needsPlaceholder={needsPlaceholder}
                 stats={TeamData}
               />
+
             </div>
+            
           </div>
         </div>
       )}

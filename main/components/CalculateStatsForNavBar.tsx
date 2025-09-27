@@ -22,7 +22,6 @@ export default function CalculateStats({
     alt,
     size = 50,
     radius = "sm",
-    _className = "",
   }: {
     src: string;
     alt: string;
@@ -70,8 +69,10 @@ export default function CalculateStats({
           {/*team 1*/}
 
           <div className="mr-2">
-            <p className="text-xs font-bold h-8 w-10 underline [text-shadow:0px_1px_2px_white]">
-              {stats.teamMatchData.teams.faction1.name}
+            <p className="text-xs font-bold h-8 max-w-[3rem] underline [text-shadow:0px_1px_2px_white] whitespace-normal break-words">
+              {stats.teamMatchData.teams.faction1.name.length > 13
+                  ? `${stats.teamMatchData.teams.faction1.name.substring(0, 13)}...`
+                  : `${stats.teamMatchData.teams.faction1.name}`}
             </p>
             <Avatar
               alt="Team1pfp"
@@ -98,7 +99,9 @@ export default function CalculateStats({
 
         <div className="ml-2">
           <p className="text-xs font-bold h-8 max-w-[3rem] underline [text-shadow:0px_1px_2px_white] whitespace-normal break-words">
-            {stats.teamMatchData.teams.faction2.name}
+            {stats.teamMatchData.teams.faction2.name.length > 13
+                  ? `${stats.teamMatchData.teams.faction2.name.substring(0, 13)}...`
+                  : `${stats.teamMatchData.teams.faction2.name}`}
           </p>
           <Avatar
             alt="Team1pfp"
@@ -123,7 +126,7 @@ export default function CalculateStats({
                       key={map.round_stats.Score}
                       className="text-xs text-black [text-shadow:0px_1px_2px_white] text-center font-bold underline"
                     >
-                      {map.round_stats.Score}{" "}
+                      {map.round_stats.Score}
                     </p>
                   </div>
                 );
@@ -132,7 +135,7 @@ export default function CalculateStats({
           </div>
         ) : (
           /*Picked By*/
-          <div className="flex">
+          <div className="flex w-full justify-center">
             <h2 className="text-lg text-white [text-shadow:0px_1px_2px_black] font-bold underline">
               {" "}
               Picked By:{" "}
@@ -150,14 +153,14 @@ export default function CalculateStats({
                 }
               />
             </div>
-            <p className="text-[10px] mt-1.5 text-black absolute ml-32 mt-2 [text-shadow:0px_1px_2px_white] font-bold underline">
+            <p className="text-[13px] w-15 text-black ml-1 mt-1.5 [text-shadow:0px_1px_2px_white] font-bold underline">
               {stats.PicksAndBans["payload"].tickets[2].entities[6]
                 .selected_by == stats.teamMatchData.teams.faction1.faction_id
-                ? stats.teamMatchData.teams.faction1.name.length > 11
-                  ? `${stats.teamMatchData.teams.faction1.name.substring(0, 11)}...`
+                ? stats.teamMatchData.teams.faction1.name.length > 10
+                  ? `${stats.teamMatchData.teams.faction1.name.substring(0, 10)}...`
                   : `${stats.teamMatchData.teams.faction1.name}`
-                : stats.teamMatchData.teams.faction2.name.length > 11
-                  ? `${stats.teamMatchData.teams.faction2.name.substring(0, 11)}...`
+                : stats.teamMatchData.teams.faction2.name.length > 10
+                  ? `${stats.teamMatchData.teams.faction2.name.substring(0, 10)}...`
                   : `${stats.teamMatchData.teams.faction2.name}`}{" "}
             </p>
           </div>

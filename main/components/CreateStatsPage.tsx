@@ -1,6 +1,5 @@
 import { Card } from "@heroui/react";
 import { ResponsivePie, PieSvgProps } from "@nivo/pie";
-import { ScrollShadow } from "@heroui/react";
 import React from "react";
 
 interface CreateStatsPageProps {
@@ -101,23 +100,6 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
                       const wr = parseInt(slice.value) / playedObj.count;
 
                       return ` | WR: ${(parseFloat(wr.toFixed(2)) * 100).toFixed(2)}%`;
-                    case "Maps Lost":
-                      const playedObj1 =
-                        type == "all"
-                          ? Played.find((obj) => obj.map_name === slice.label)
-                          : type == "bo1"
-                            ? bo1Played.find(
-                                (obj) => obj.map_name === slice.label,
-                              )
-                            : bo3Played.find(
-                                (obj) => obj.map_name === slice.label,
-                              );
-
-                      if (!playedObj1) return null;
-
-                      const Lr = parseInt(slice.value) / playedObj1.count;
-
-                      return ` | LR: ${(parseFloat(Lr.toFixed(2)) * 100).toFixed(2)}%`;
                     case "First Ban":
                       if (type == "all") {
                         break;
@@ -320,23 +302,31 @@ function CreateStatsPage({
   bo3Won = [];
 
   console.log("NO FUCKING WAY ", stats);
-
+  
   /* Each of these arrays will have an object like this pushed to them:
       {"map_name" : "number"}
   */
   if (needsPlaceholder) {
     return (
-      <Card
+      <div>
+              <Card
         className="border rounded-lg bg-cumground flex h-154 w-386 justify-center mt-1"
         id="placeholder"
       >
         <p className="text-center text-lg text-white ">
           Choose an ESEA season above in order to obtain stats!
         </p>
+        
       </Card>
+                    <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
+                    <span className="text-white ">&copy; AtomicRecall 2025</span>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.10</p>
+              </footer>
+      </div>
+
     );
   }
-  if (stats) {
+  if (stats && stats.length > 0) {
     needsPlaceholder = false;
     let bo1s: any[] = [];
     let bo3s: any[] = [];
@@ -580,6 +570,39 @@ function CreateStatsPage({
       for (const eachBo3 of bo3s) {
         let numPick = 0;
         let numBan = 0;
+        for (const Round of eachBo3.matchData.rounds){
+          let round_stats = Round.round_stats;
+        const Object = bo3Played.find(
+          (obj) => obj.map_name === round_stats.Map,
+        );
+
+        if (Object) {
+          Object.count += 1;
+        } else {
+          bo3Played.push({ map_name: round_stats.Map, count: 1 });
+        }
+
+        if (round_stats.Winner == SelectedTeam) {
+          const Object = bo3Won.find((obj) => obj.map_name === round_stats.Map);
+
+          if (Object) {
+            Object.count += 1;
+          } else {
+            bo3Won.push({ map_name: round_stats.Map, count: 1 });
+          }
+        } else {
+          const Object = bo3Lost.find(
+            (obj) => obj.map_name === round_stats.Map,
+          );
+
+          if (Object) {
+            Object.count += 1;
+          } else {
+            bo3Lost.push({ map_name: round_stats.Map, count: 1 });
+          }
+        }
+        }
+        
 
         for (const eachPickOrBan of eachBo3.PicksAndBans.payload.tickets[2]
           .entities) {
@@ -719,36 +742,6 @@ function CreateStatsPage({
               default:
                 break;
             }
-          }
-        }
-        let round_stats = eachBo3.matchData.rounds[0].round_stats;
-        const Object = bo3Played.find(
-          (obj) => obj.map_name === round_stats.Map,
-        );
-
-        if (Object) {
-          Object.count += 1;
-        } else {
-          bo3Played.push({ map_name: round_stats.Map, count: 1 });
-        }
-
-        if (round_stats.Winner == SelectedTeam) {
-          const Object = bo3Won.find((obj) => obj.map_name === round_stats.Map);
-
-          if (Object) {
-            Object.count += 1;
-          } else {
-            bo3Won.push({ map_name: round_stats.Map, count: 1 });
-          }
-        } else {
-          const Object = bo3Lost.find(
-            (obj) => obj.map_name === round_stats.Map,
-          );
-
-          if (Object) {
-            Object.count += 1;
-          } else {
-            bo3Lost.push({ map_name: round_stats.Map, count: 1 });
           }
         }
       }
@@ -935,34 +928,35 @@ function CreateStatsPage({
     }
 
     return (
+      <div>
       <Card className="p-4 border rounded-lg bg-cumground flex flex-col w-386 ml-1 mt-1 justify-center">
-        <ScrollShadow
-          className="h-146 overflow-y-scroll overflow-x-hidden"
+        <div
+          className="overflow-y-hidden overflow-x-hidden"
           id="onlyHereToCheckIfStuffHasBeenAppended"
         >
-          <Card className="p-4 border rounded-lg bg-cumground mb-4 h-114">
-            <p className="text-2xl text-white absolute">ALL:</p>
-            <div className="flex gap-4 justify-center">
-              {bo3s.length < 1 ? (
+          {(bo3s.length >1)?
+            <Card className="p-4 border rounded-lg bg-cumground mb-4 h-114">
+            <p className="text-[50px] font-bold -mt-5 text-white absolute">ALL:</p>
+            <div className="gap-4">
                 <div
-                  className="overflow-x-auto overflow-y-hidden overflow-x-hidden flex"
+                  className="overflow-x-auto overflow-y-hidden overflow-x-hidden flex justify-center"
                   style={{ height: 430 }}
                 >
-                  <div className="snap-center">
+                  <div className="">
                     <PieChartWithLegend
                       data={PlayedData}
                       title="Maps Played"
                       type={"all"}
                     />
                   </div>
-                  <div className="snap-center">
+                  <div className="">
                     <PieChartWithLegend
                       data={WinsData}
                       title="Maps Won"
                       type={"all"}
                     />
                   </div>
-                  <div className="snap-center">
+                  <div className="">
                     <PieChartWithLegend
                       data={LossData}
                       title="Maps Lost"
@@ -970,117 +964,54 @@ function CreateStatsPage({
                     />
                   </div>
                 </div>
-              ) : (
-                <div className="flex gap-4 justify-center" id="Original">
-                  <div
-                    className="overflow-x-auto overflow-y-hidden flex snap-x"
-                    style={{ width: 400, height: 430 }}
-                  >
-                    <div className="snap-center">
-                      <PieChartWithLegend
-                        data={PlayedData}
-                        title="Maps Played"
-                        type={"all"}
-                      />
-                    </div>
-                    <div className="snap-center">
-                      <PieChartWithLegend
-                        data={WinsData}
-                        title="Maps Won"
-                        type={"all"}
-                      />
-                    </div>
-                    <div className="snap-center">
-                      <PieChartWithLegend
-                        data={LossData}
-                        title="Maps Lost"
-                        type={"all"}
-                      />
-                    </div>
-                  </div>
-                  <PieChartWithLegend
-                    data={PickData}
-                    title="Picks"
-                    type={"all"}
-                  />
-                  <div
-                    className="overflow-x-auto overflow-y-hidden flex snap-x"
-                    style={{ width: 400, height: 430 }}
-                  >
-                    <div className="snap-center">
-                      <PieChartWithLegend
-                        data={FirstBanData}
-                        title="First Ban"
-                        type={"all"}
-                      />
-                    </div>
-                    <div className="snap-center">
-                      <PieChartWithLegend
-                        data={SecondBanData}
-                        title="Second Ban"
-                        type={"all"}
-                      />
-                    </div>
-                    <div className="snap-center">
-                      <PieChartWithLegend
-                        data={ThirdBanData}
-                        title="Third Ban"
-                        type={"all"}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
+              
             </div>
-          </Card>
-          {/*(bo1s should always be outputted)*/}
-          <Card className="p-4 border rounded-lg bg-cumground h-114 mb-4">
-            <p className="text-2xl text-white absolute">BO1:</p>
-            <div className="flex justify-center">
-              <div
-                className="overflow-x-auto overflow-y-hidden flex snap-x"
-                style={{ width: 400, height: 430 }}
-              >
-                <div className="snap-center">
-                  <PieChartWithLegend
-                    data={bo1PlayedData}
-                    title="Maps Played"
-                    type={"bo1"}
-                  />
-                </div>
-                <div className="snap-center">
-                  <PieChartWithLegend
-                    data={bo1WonData}
-                    title="Maps Won"
-                    type={"bo1"}
-                  />
-                </div>
+            
+          </Card>:null}
 
-                <div className="snap-center">
-                  <PieChartWithLegend
-                    data={bo1LostData}
-                    title="Maps Lost"
-                    type={"bo1"}
-                  />
+          {/*(bo1s should always be outputted)*/}
+          <Card className="p-4 border rounded-lg bg-cumground mb-4 ">
+            <p className="text-[50px] font-bold -mt-5 text-white absolute">BO1:</p>
+            <div className="flex-row ">
+              <div className="flex justify-center">
+                <div
+                  className="overflow-x-hidden overflow-y-hidden flex "
+                  style={{ width: 900, height: 430 }}
+                >
+                  <div className="">
+                    <PieChartWithLegend
+                      data={bo1PlayedData}
+                      title="Maps Played"
+                      type={"bo1"}
+                    />
+                  </div>
+                  <div className="">
+                    <PieChartWithLegend
+                      data={bo1WonData}
+                      title="Maps Won"
+                      type={"bo1"}
+                    />
+                  </div>
                 </div>
+                <PieChartWithLegend
+                  data={bo1PickData}
+                  title="Picks"
+                  type={"bo1"}
+                />
               </div>
-              <PieChartWithLegend
-                data={bo1PickData}
-                title="Picks"
-                type={"bo1"}
-              />
+              <div className="flex justify-center">
               <div
-                className="overflow-x-auto overflow-y-hidden flex snap-x"
-                style={{ width: 400, height: 430 }}
+                className="overflow-x-hidden overflow-y-hidden flex"
+                style={{ width: 1300, height: 430 }}
               >
-                <div className="snap-center">
+                <div className="">
                   <PieChartWithLegend
                     data={bo1FirstBanData}
                     title="First Ban"
                     type={"bo1"}
                   />
                 </div>
-                <div className="snap-center">
+                <div className="">
                   <PieChartWithLegend
                     data={bo1SecondBanData}
                     title="Second Ban"
@@ -1088,7 +1019,7 @@ function CreateStatsPage({
                   />
                 </div>
 
-                <div className="snap-center">
+                <div className="">
                   <PieChartWithLegend
                     data={bo1ThirdBanData}
                     title="Third Ban"
@@ -1096,24 +1027,25 @@ function CreateStatsPage({
                   />
                 </div>
               </div>
+              </div>
             </div>
           </Card>
           {bo3s.length > 1 ? (
-            <Card className="p-4 border rounded-lg bg-cumground h-114">
-              <p className="text-2xl text-gray-100 absolute">BO3:</p>
-              <div className="flex gap-4 justify-center">
+            <Card className="p-4 border rounded-lg bg-cumground ">
+              <p className="text-[50px] -mt-5 font-bold text-gray-100 absolute">BO3:</p>
+              <div className="flex-row gap-4 ">
                 <div
-                  className="overflow-x-auto overflow-y-hidden flex snap-x"
-                  style={{ width: 400, height: 430 }}
+                  className="overflow-x-hidden overflow-y-hidden flex justify-center"
+                  style={{ height: 430 }}
                 >
-                  <div className="snap-center">
+                  <div className="">
                     <PieChartWithLegend
                       data={bo3PlayedData}
                       title="Maps Played"
                       type={"bo1"}
                     />
                   </div>
-                  <div className="snap-center">
+                  <div className="">
                     <PieChartWithLegend
                       data={bo3WonData}
                       title="Maps Won"
@@ -1121,7 +1053,7 @@ function CreateStatsPage({
                     />
                   </div>
 
-                  <div className="snap-center">
+                  <div className="">
                     <PieChartWithLegend
                       data={bo3LostData}
                       title="Maps Lost"
@@ -1132,8 +1064,8 @@ function CreateStatsPage({
                 {/* First Pick/Ban Slot */}
                 {bo3FirstPickData.length > 0 && (
                   <div
-                    className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory"
-                    style={{ width: 400, height: 430 }}
+                    className="overflow-x-auto overflow-y-hidden flex justify-center"
+                    style={{ height: 430 }}
                   >
                     <div className="flex" style={{ width: "max-content" }}>
                       <div className="snap-start">
@@ -1167,8 +1099,8 @@ function CreateStatsPage({
                 {/* Second Pick/Ban Slot */}
                 {bo3FirstBanData.length > 0 && (
                   <div
-                    className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory"
-                    style={{ width: 400, height: 430 }}
+                    className="overflow-x-auto overflow-y-hidden flex justify-center"
+                    style={{height: 430 }}
                   >
                     <div className="flex" style={{ width: "max-content" }}>
                       <div className="snap-start">
@@ -1189,10 +1121,20 @@ function CreateStatsPage({
                   </div>
                 )}
               </div>
+                            <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
+                    <span className="text-white ">&copy; AtomicRecall 2025</span>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.10</p>
+              </footer>
             </Card>
+            
           ) : null}
-        </ScrollShadow>
+        </div>
       </Card>
+      <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
+                    <span className="text-white ">&copy; AtomicRecall 2025</span>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.10</p>
+              </footer>
+      </div>
     );
   } else {
     if (!isLoading) {
@@ -1202,6 +1144,7 @@ function CreateStatsPage({
             We found nothing in those matches!
           </p>
         </Card>
+
       );
     }
   }
