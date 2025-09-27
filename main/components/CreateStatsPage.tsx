@@ -1121,10 +1121,6 @@ function CreateStatsPage({
                   </div>
                 )}
               </div>
-                            <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
-                    <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.10</p>
-              </footer>
             </Card>
             
           ) : null}
