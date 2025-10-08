@@ -113,6 +113,8 @@ export default function FuckWithProfile() {
       window.open("https://www.faceit.com/en/players/" + name);
       // Your custom logic here
     };
+
+
   const handleSelectionChange = async (keys: any) => {
     setSelectedKeys(keys);
     setneedsPlaceholder(false);
@@ -497,12 +499,13 @@ export default function FuckWithProfile() {
                           <div
                             className="w-12 h-12 rounded-full cursor-pointer 
                           hover:shadow-[0_0_10px_1px_white] transition duration-200"
+                          onClick={OpenPlayerName(member?.user_name)}
                           >
                             <Image
                               alt={`${member?.user_name} logo`}
                               className="w-12 h-12 rounded-full hover:shadow-[0_0_8px_white]"
                               radius="full"
-                              onClick={OpenPlayerName}
+                              
                               src={
                                 member?.avatar_img !== ""
                                   ? member?.avatar_img

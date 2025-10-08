@@ -5,8 +5,15 @@ import CalculateStats from "@/components/CalculateStatsForNavBar";
 export default function AddSeasonToMenu(stats: any) {
   console.log("Fart penis ", stats.stats.matchData);
   console.log("OUR TEAM???", stats.SELECT);
+  console.log("FUCK BALLS ", stats);
   let isBO3 = stats.stats.matchData.rounds.length > 1 ? true : false;
-
+    const OpenMatchPage =
+      (matchID: any) => (event: React.MouseEvent<HTMLParagraphElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        window.open("https://www.faceit.com/en/cs2/room/" + matchID);
+        // Your custom logic here
+      };
   console.log("GET UP", parseInt(stats.stats.matchData.seasonNum));
 
   function returnImage(round: any) {
@@ -162,7 +169,7 @@ export default function AddSeasonToMenu(stats: any) {
   }
 
   return (
-    <div key={stats.stats.matchData.seasonNum}>
+    <div onClick={OpenMatchPage(stats.stats.teamMatchData.match_id)} key={stats.stats.matchData.seasonNum}>
       {isBO3 ? (
         <div className="flex rounded-lg overflow-hidden mt-2 cursor-pointer hover:shadow-[0_0_8px_white] transition duration-200">
           <div className="flex justfiy-center">
