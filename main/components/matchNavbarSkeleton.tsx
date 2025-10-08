@@ -3,7 +3,7 @@ import { Card, Skeleton } from "@heroui/react";
 
 export default function MatchNavbarSkeleton() {
   return (
-    <Card className={`w-70 py-4 mt-1`} radius="lg">
+    <Card className={`w-70 py-4 mt-1 flex-shrink-0`} radius="lg">
       <div className={`flex w-10 h-146`}>
         <div>
           <div className="flex ml-2">

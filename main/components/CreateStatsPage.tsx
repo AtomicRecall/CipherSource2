@@ -309,8 +309,8 @@ function CreateStatsPage({
   if (needsPlaceholder) {
     return (
       <div>
-              <Card
-        className="border rounded-lg bg-cumground flex h-154 w-386 justify-center mt-1"
+        <Card
+        className="border rounded-lg bg-cumground flex h-154 justify-center mt-1 w-full"
         id="placeholder"
       >
         <p className="text-center text-lg text-white ">
@@ -320,7 +320,7 @@ function CreateStatsPage({
       </Card>
                     <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
                     <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.10</p>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.11</p>
               </footer>
       </div>
 
@@ -566,7 +566,7 @@ function CreateStatsPage({
     const bo3WonData = [];
     const bo3LostData = [];
 
-    if (bo3s.length > 1) {
+    if (bo3s.length > 0) {
       for (const eachBo3 of bo3s) {
         let numPick = 0;
         let numBan = 0;
@@ -929,7 +929,7 @@ function CreateStatsPage({
 
     return (
       <div>
-      <Card className="p-4 border rounded-lg bg-cumground flex flex-col w-386 ml-1 mt-1 justify-center">
+      <Card className="p-4 border rounded-lg bg-cumground flex flex-col mt-1 justify-center w-full">
         <div
           className="overflow-y-hidden overflow-x-hidden"
           id="onlyHereToCheckIfStuffHasBeenAppended"
@@ -970,7 +970,8 @@ function CreateStatsPage({
           </Card>:null}
 
           {/*(bo1s should always be outputted)*/}
-          <Card className="p-4 border rounded-lg bg-cumground mb-4 ">
+          {bo1s.length >=1 ?(
+                      <Card className="p-4 border rounded-lg bg-cumground mb-4 ">
             <p className="text-[50px] font-bold -mt-5 text-white absolute">BO1:</p>
             <div className="flex-row ">
               <div className="flex justify-center">
@@ -1030,7 +1031,8 @@ function CreateStatsPage({
               </div>
             </div>
           </Card>
-          {bo3s.length > 1 ? (
+          ):null}
+          {bo3s.length >= 1 ? (
             <Card className="p-4 border rounded-lg bg-cumground ">
               <p className="text-[50px] -mt-5 font-bold text-gray-100 absolute">BO3:</p>
               <div className="flex-row gap-4 ">
@@ -1128,14 +1130,14 @@ function CreateStatsPage({
       </Card>
       <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
                     <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.10</p>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.11</p>
               </footer>
       </div>
     );
   } else {
     if (!isLoading) {
       return (
-        <Card className="border rounded-lg bg-cumground flex h-154 w-386 justify-center mt-1">
+        <Card className="border rounded-lg bg-cumground flex h-154 justify-center mt-1">
           <p className="text-center text-lg text-gray-600">
             We found nothing in those matches!
           </p>

@@ -14,6 +14,13 @@ const config = {
         mono: ["var(--font-mono)"],
         play: ["var(--font-play)"]
       },
+      width: {
+        '70': '17.5rem',
+        '154': '38.5rem', // 616px - consistent height
+      },
+      height: {
+        '154': '38.5rem', // 616px - consistent height
+      },
     },
   },
   darkMode: "class",

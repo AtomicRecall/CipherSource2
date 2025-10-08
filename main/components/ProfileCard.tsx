@@ -1,9 +1,11 @@
 "use client";
 import { Card, Skeleton } from "@heroui/react";
-
+import StatsSkeleton from "@/components/StatsSkeleton";
+import MatchNavbarSkeleton from "@/components/matchNavbarSkeleton";
 export default function CreateSkeleton() {
   return (
-    <Card className={`space-y-5 p-4`} radius="lg">
+    <div>
+      <Card className={`space-y-5 p-4`} radius="lg">
       <div className={`flex  gap-3`}>
         <div>
           <Skeleton className="flex rounded-medium w-35 h-35" />
@@ -22,5 +24,15 @@ export default function CreateSkeleton() {
         </div>
       </div>
     </Card>
+    <div className="flex mt-2">
+      <div className="mr-1">
+                <MatchNavbarSkeleton />
+
+      </div>
+       <StatsSkeleton/>
+    </div>
+
+    </div>
+    
   );
 }

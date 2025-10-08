@@ -26,7 +26,7 @@ export default function FuckWithProfile() {
   const searchParams = useSearchParams();
 
   if (searchParams.size == 0) {
-    window.location.href = "/home.html";
+    window.location.href = "/home";
   }
   const user = searchParams
     .toString()
@@ -296,9 +296,15 @@ export default function FuckWithProfile() {
                       }
                     />
                   </div>
-                  <p className="text-5xl font-bold text-white cursor-pointer hover:[text-shadow:0_0_8px_white]">
+                  <p
+                    className="text-5xl font-bold text-white cursor-pointer
+                              transition-[text-shadow] duration-300 hover:duration-150
+                              hover:[text-shadow:0_0_8px_white]"
+                    onClick={OpenTeamName}
+                  >
                     {data.teamdata?.name}
                   </p>
+
                   <p className="text text-zinc-500 flex items-end px-1">
                     ({data.teamdata?.nickname})
                   </p>
@@ -496,6 +502,7 @@ export default function FuckWithProfile() {
                               alt={`${member?.user_name} logo`}
                               className="w-12 h-12 rounded-full hover:shadow-[0_0_8px_white]"
                               radius="full"
+                              onClick={OpenPlayerName}
                               src={
                                 member?.avatar_img !== ""
                                   ? member?.avatar_img
@@ -534,7 +541,7 @@ export default function FuckWithProfile() {
                       </p>
                     </Card>
                   ) : (
-                    <div className="mt-1 w-70 overflow-x-hidden">
+                    <div className="mt-1 w-70 overflow-x-hidden flex-shrink-0">
                       {uiNode.slice().sort((a: any, b: any) => {
                         if (
                           !React.isValidElement(a) ||
@@ -563,7 +570,7 @@ export default function FuckWithProfile() {
                 </div>
               </>
             )}
-            <div id="FartSniffer" className="ml-1">
+            <div id="FartSniffer" className="ml-1 flex-1">
               <CreateStatsPage
                 SelectedTeam={data.teamdata?.team_id}
                 isLoading={navLoading}

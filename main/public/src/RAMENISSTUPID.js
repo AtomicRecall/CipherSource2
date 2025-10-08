@@ -5,37 +5,35 @@ window.onload = () => {
 
 
     [$search, document.getElementById("fart")].forEach(el => {
-
-        el.addEventListener('hover', (event) =>{
-
-        })
         el.addEventListener('click', (event) => {
 
         console.log(event.target.classList);
 
-        if(document.querySelector(".search-icon").classList.contains("Searchmove")){
-                document.querySelector(".search-icon").classList.remove("Searchmove");
-        }
+        document.getElementById("SearchIcon").onclick = function(){
+            if(document.getElementById("searchText").value.trim() !== ""){
+                ClickSearch(event);
 
-            if(event.target.classList.contains("search-icon") || event.target.tagName.toLowerCase() === 'circle' || event.target.classList.contains("search-line") ){
+            }
+            else{
+                alert("You wrote nothing in the input!");
+            }
+        }
+        
+            if((event.target.tagName.toLowerCase() === 'circle' || event.target.classList.contains("search-line") && event.target.classList.contains("search-icon"))){
                 
                 document.querySelector(".container .result").innerHTML = "";    
-                ClickSearch(event);
-                document.querySelector(".search-icon").style.filter = "drop-shadow(1px 1px 2px #FF6900)";
-                
-
+                //ClickSearch(event);
                 return;
             }
             else{
                 
                 if (document.querySelector(".search-icon").classList.contains("moveSearch")){
                     document.querySelector(".search-icon").classList.remove("moveSearch");
-                    document.querySelector(".search-icon").classList.add("Searchmove");
                     document.querySelector(".container .text").style.width = "700px";
                     document.querySelector(".container .text").style.transform = "translateY(0px)";
                     document.querySelector("#actualText .search-text").style.transform = "translate(0, 8px)";
                     document.getElementById("actualText").style.transform = "translateX(0px)";
-                    document.querySelector(".search-icon").style.filter = "drop-shadow(0px 0px 0px #FF6900)";
+                    
                     document.querySelector(".result").innerHTML = "";
                 }
             }
@@ -47,24 +45,53 @@ window.onload = () => {
         let classes = $root.classList;
         if (classes.contains('search-open') && classes.contains('search-close')) {
         classes.remove('search-close');
+        const searchIcon = document.querySelector('.search-icon');
+        const actualText = document.getElementById('actualText');
+
+        // Only move if it’s not already inside #actualText
+        if (searchIcon && actualText && !actualText.contains(searchIcon)) {
+            actualText.appendChild(searchIcon);
+            searchIcon.style.top = "3px";
+            
+            // Optional: style for positioning at the end
+            searchIcon.style.marginLeft = "auto";
+        }
         document.querySelector(".search-icon circle").style.stroke = "#FFFFFF";
         document.querySelector(".search-icon line").style.stroke = "#FFFFFF";
         document.querySelectorAll("#thing").forEach(el => { el.style.background ="#FFFFFF";});
         
         } else if (classes.contains('search-open')) {
         classes.add('search-close');
+        const searchIcon = document.querySelector('.search-icon');
+        const searchDivider = document.querySelector('.search');
+
+        if (searchIcon && searchDivider) {
+            searchDivider.appendChild(searchIcon);
+        }
+
         document.querySelector(".search-icon circle").style.stroke = "#000000";
         document.querySelector(".search-icon line").style.stroke = "#000000";
         document.querySelectorAll("#thing").forEach(el => {  el.style.background ="#000000";});
 
         } else {
         classes.add('search-open');
+        const searchIcon = document.querySelector('.search-icon');
+        const actualText = document.getElementById('actualText');
+
+        // Only move if it’s not already inside #actualText
+        if (searchIcon && actualText && !actualText.contains(searchIcon)) {
+            actualText.appendChild(searchIcon);
+            searchIcon.style.top = "3px";
+            
+            // Optional: style for positioning at the end
+            searchIcon.style.marginLeft = "auto";
+        }
         document.querySelector(".search-icon circle").style.stroke = "#FFFFFF";
         document.querySelector(".search-icon line").style.stroke = "#FFFFFF";
         document.querySelectorAll("#thing").forEach(el => { el.style.background ="#FFFFFF";});
 
         
-
+    
         
         }
   });
@@ -123,6 +150,8 @@ function fadeInViaTransition(el, duration = 500) {
   el.style.transition = `opacity ${duration}ms ease`;
   // Force a reflow so the browser commits opacity:0 as a starting point
   void el.offsetWidth; // or el.getBoundingClientRect();
+                  document.getElementById("searchText").disabled = false;
+
   el.style.opacity = 1;
 }
 
@@ -139,9 +168,6 @@ async function ClickSearch(event){
     document.querySelector(".container .text").style.transform = "translateY(-328px)";
     document.getElementById("actualText").style.transform = "translateX(-550px)";
     document.getElementById("actualText").style.position = "relative";
-
-
-
     document.getElementById("searchText").disabled = true;
 
     await fetch(`https://open.faceit.com/data/v4/search/teams?nickname=${document.getElementById("searchText").value}&game=cs2`,{
@@ -152,7 +178,9 @@ async function ClickSearch(event){
     .then(response => {
         // Check if the request was successful (status code 200-299)
         if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+           
+
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         // Parse the response body as JSON
         return response.json();
@@ -160,7 +188,12 @@ async function ClickSearch(event){
     .then(data =>{
         // Handle the fetched data
        // console.log(data);
-        
+        if(data.items.length < 1){
+             alert("Was not able to retrieve teams from your input!");
+             document.getElementById("searchText").disabled = false;
+             document.getElementById("searchText").value = "";
+             return;
+        }
         for(const team of data.items){
 
             fetch(`https://open.faceit.com/data/v4/teams/${team.team_id}`,{
@@ -177,9 +210,7 @@ async function ClickSearch(event){
             .then(data =>{
              //   console.log("HOLY SHIT:")
               //  console.log(data);
-
-                document.getElementById("searchText").disabled = false;
-                document.querySelector(".search-icon").style.filter = "drop-shadow(0px 0px 0px #FF6900)";
+                
                 if (data.members.length < 5){
                     return;
                 }
@@ -448,7 +479,6 @@ async function ClickSearch(event){
                 updateCarousel();
                 startAutoSlide();
             })
-                
             })
             .catch(error =>{
                 // Handle any errors that occurred during the fetch operation

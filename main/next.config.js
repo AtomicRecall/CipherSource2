@@ -11,6 +11,14 @@ const nextConfig = {
         // your project has TypeScript errors.
         ignoreBuildErrors: true,
     },
+    async rewrites() {
+        return [
+            {
+                source: '/home',
+                destination: '/home.html',
+            },
+        ];
+    },
 };
 
 module.exports = nextConfig;

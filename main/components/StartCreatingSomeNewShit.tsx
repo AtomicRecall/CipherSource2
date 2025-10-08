@@ -18,7 +18,7 @@ export default function CreateMatchNavbar(
   ));
 
   return (
-    <Card className="p-4 border rounded-lg bg-cumground flex w-70 ">
+    <Card className="p-4 border rounded-lg bg-cumground flex w-70 flex-shrink-0">
       <div className="flex flex-col">
         <GetAndReturnESEALOGO Data={leagueInfo} />
         {mappedSeasons}
