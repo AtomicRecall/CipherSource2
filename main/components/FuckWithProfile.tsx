@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Image } from "@heroui/react";
 import React from "react";
 import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   Dropdown,
   DropdownTrigger,
@@ -16,7 +17,7 @@ import { Card } from "@heroui/react";
 import CreateStatsPage from "./CreateStatsPage";
 import StartGettingShit from "./GetAllThatFuckingShit";
 import StatsSkeleton from "./StatsSkeleton";
-
+import RosterSkeleton from "./RosterSkeleton";
 import CreateMatchNavbar from "@/components/StartCreatingSomeNewShit";
 import MatchNavbarSkeleton from "@/components/matchNavbarSkeleton";
 import Flag from "@/components/Flag";
@@ -38,9 +39,39 @@ let thisSeason = 55;
       window.open("https://www.faceit.com/en/players/" + name);
       // Your custom logic here
     };
+  function addRosterSkeletonForSeason(season: any) {
+    const container = document.getElementById("PoopEater");
+    if (!container) {
+      console.log("PoopEater container not found!");
+      return;
+    }
+
+    console.log(`Adding skeleton for season ${season} to PoopEater container`);
+
+    // Create a container div for the React component
+    const skeletonContainer = document.createElement('div');
+    skeletonContainer.id = `roster-skeleton-${season}`;
+    
+    // Append the container to PoopEater
+    container.appendChild(skeletonContainer);
+    
+    // Render the RosterSkeleton React component
+    const root = createRoot(skeletonContainer);
+    root.render(React.createElement(RosterSkeleton));
+    
+    console.log(`Skeleton for season ${season} added to PoopEater`);
+  }
+
   function addRosterForSeason(memberz:any, season:any){
     const container = document.getElementById("PoopEater");
     if (!container) return;
+
+    // Remove skeleton if it exists
+    const skeletonCard = document.getElementById(`roster-skeleton-${season}`);
+    if (skeletonCard) {
+      console.log(`Removing skeleton for season ${season}`);
+      skeletonCard.remove();
+    }
 
     // Create the roster card element
     const rosterCard = document.createElement('div');
@@ -53,11 +84,11 @@ let thisSeason = 55;
     seasonLogo.alt = `Season ${season}Logo`;
     seasonLogo.height = 40;
     seasonLogo.width = 40;
-    seasonLogo.className = 'ml-2 mb-6';
+    seasonLogo.className = 'ml-2 mb-11';
     
     // Add colon
     const colon = document.createElement('p');
-    colon.className = 'text-white text-xl mb-6';
+    colon.className = 'text-white text-xl mb-11 -ml-2';
     colon.textContent = ':';
     
     rosterCard.appendChild(seasonLogo);
@@ -154,6 +185,12 @@ let thisSeason = 55;
     } else {
       console.log(`No roster found for season ${season}`);
     }
+
+    // Also remove skeleton if it exists
+    const skeletonCard = document.getElementById(`roster-skeleton-${season}`);
+    if (skeletonCard) {
+      skeletonCard.remove();
+    }
   }
 
   function sortRostersBySeason() {
@@ -197,7 +234,7 @@ export default function FuckWithProfile() {
   );
   const [uiNode, setUiNode] = useState<React.ReactElement[]>([]);
   const [navLoading, setNavLoading] = useState(false);
-  const [needsPlaceholder, setneedsPlaceholder] = useState(true);
+  const [needsPlaceholder, setneedsPlaceholder] = useState(false); // Changed to false since we'll have a default selection
 
   // ✅ Clear sessionStorage once on page load
   useEffect(() => {
@@ -253,6 +290,29 @@ export default function FuckWithProfile() {
     }
     loadProfile();
   }, [user]);
+
+  // Auto-select thisSeason when data is loaded
+  useEffect(() => {
+    if (data?.leagues?.[0]?.league_seasons_info && selectedKeys.size === 0) {
+      // Find the season matching thisSeason
+      const currentSeason = data.leagues[0].league_seasons_info.find(
+        (season: any) => season.season_number == thisSeason
+      );
+      
+      if (currentSeason?.season_standings?.length > 0) {
+        const currentSeasonKey = `S${currentSeason.season_number} ${currentSeason.season_standings[0].division_name}`;
+        const newSelectedKeys = new Set([currentSeasonKey]);
+        setSelectedKeys(newSelectedKeys);
+        
+        // Trigger the selection logic for thisSeason with proper Set structure
+        // We need to create a mock object that mimics what the dropdown passes
+        const mockKeys = new Set([currentSeasonKey]);
+        // Add currentKey property to the Set for compatibility
+        (mockKeys as any).currentKey = currentSeasonKey;
+        handleSelectionChange(mockKeys);
+      }
+    }
+  }, [data, selectedKeys.size]);
   const OpenTeamName = (event: React.MouseEvent<HTMLParagraphElement>) => {
     event.preventDefault(); // if needed
     event.stopPropagation(); // if needed
@@ -304,6 +364,13 @@ export default function FuckWithProfile() {
     if (B4Size - curSize < 0) {
       console.log("ADD "+parseInt(keys.currentKey.substring(1, 3)));
       setNavLoading(true);
+      
+      // Add skeleton for the season being loaded
+      const seasonNumber = parseInt(keys.currentKey.substring(1, 3));
+      if (seasonNumber != thisSeason) {
+        addRosterSkeletonForSeason(seasonNumber);
+      }
+      
       for (const season of data.leagues[0].league_seasons_info) {
         if (season.season_number == parseInt(keys.currentKey.substring(1, 3))) {
           let GotAllMyShit = [];
@@ -414,7 +481,6 @@ export default function FuckWithProfile() {
 
           console.log("GOT ALL PLAYED PLAYERS: ",PlayedPlayers);
           if(season.season_number != thisSeason){
-            console.log("FUCK MY BUTTHOLE "+season.season_number)
              addRosterForSeason(PlayedPlayers, season.season_number)
 
           }

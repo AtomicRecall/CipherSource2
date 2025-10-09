@@ -1,6 +1,7 @@
 import { Card } from "@heroui/react";
 import { ResponsivePie, PieSvgProps } from "@nivo/pie";
 import React from "react";
+import { siteConfig } from "../config/site";
 
 interface CreateStatsPageProps {
   needsPlaceholder: boolean;
@@ -318,8 +319,8 @@ function CreateStatsPage({
         
       </Card>
                     <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
-                    <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.20</p>
+                    <span className="text-white ">&copy; {siteConfig.copyright}</span>
+                    <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>
               </footer>
       </div>
 
@@ -934,7 +935,7 @@ function CreateStatsPage({
           className="overflow-y-hidden overflow-x-hidden"
           id="onlyHereToCheckIfStuffHasBeenAppended"
         >
-          {(bo3s.length >1)?
+          {(bo3s.length >1 && bo1s.length>1)?
             <Card className="p-4 border rounded-lg bg-cumground mb-4 h-114">
             <p className="text-[50px] font-bold -mt-5 text-white absolute">ALL:</p>
             <div className="gap-4">
@@ -1129,8 +1130,8 @@ function CreateStatsPage({
         </div>
       </Card>
       <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
-                    <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.20</p>
+                    <span className="text-white ">&copy; {siteConfig.copyright}</span>
+                    <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>
               </footer>
       </div>
     );

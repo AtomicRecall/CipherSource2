@@ -1,5 +1,6 @@
 "use client";
 import { Card, Skeleton } from "@heroui/react";
+import { siteConfig } from "../config/site";
 
 export default function StatsSkeleton() {
   return (
@@ -13,8 +14,8 @@ export default function StatsSkeleton() {
       </div>
     </Card>
     <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
-                    <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.20</p>
+                    <span className="text-white ">&copy; {siteConfig.copyright}</span>
+                    <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>
               </footer>
     </div>
   );

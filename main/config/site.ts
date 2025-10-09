@@ -3,6 +3,8 @@ export type SiteConfig = typeof siteConfig;
 export const siteConfig = {
   name: "CS2",
   description: "",
+  version: "CS2 Alpha 1.21",
+  copyright: "AtomicRecall 2025",
   navItems: [
     {
       label: "Home",
