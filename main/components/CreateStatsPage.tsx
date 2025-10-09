@@ -54,7 +54,6 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
       },
     },
   };
-
   return (
     <div
       className="flex flex-col items-center"
@@ -320,7 +319,7 @@ function CreateStatsPage({
       </Card>
                     <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
                     <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.11</p>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.20</p>
               </footer>
       </div>
 
@@ -707,6 +706,7 @@ function CreateStatsPage({
                 } else {
                   bo3FirstBan.push({ map_name: eachPickOrBan.guid, count: 1 });
                 }
+                
                 const mapObj1 = FirstBan.find(
                   (obj) => obj.map_name == eachPickOrBan.guid,
                 );
@@ -1130,7 +1130,7 @@ function CreateStatsPage({
       </Card>
       <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
                     <span className="text-white ">&copy; AtomicRecall 2025</span>
-                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.11</p>
+                    <p className="text-background font-bold text-shadow-lg">CS2 Alpha 1.20</p>
               </footer>
       </div>
     );

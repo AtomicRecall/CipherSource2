@@ -72,7 +72,8 @@ window.onload = () => {
         document.querySelector(".search-icon circle").style.stroke = "#000000";
         document.querySelector(".search-icon line").style.stroke = "#000000";
         document.querySelectorAll("#thing").forEach(el => {  el.style.background ="#000000";});
-
+                     document.getElementById("searchText").disabled = false;
+             document.getElementById("searchText").value = "";
         } else {
         classes.add('search-open');
         const searchIcon = document.querySelector('.search-icon');
