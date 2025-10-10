@@ -1,3 +1,5 @@
+import { getFaceitHeaders } from "../config/api-keys";
+
 export default async function fetchGameStats(matchid, seasonNum, seasonDiv) {
   try {
     let skipPrinting = false;
@@ -16,11 +18,9 @@ export default async function fetchGameStats(matchid, seasonNum, seasonDiv) {
     }
 
     // 2️⃣ Fetch team match data
+    const headers = getFaceitHeaders();
     let teamMatchData = await fetch(`https://open.faceit.com/data/v4/matches/${matchid}`, {
-      headers: {
-        'accept': 'application/json',
-        'Authorization': 'Bearer 29645383-3447-4a8d-90b8-76fcf5904c45'
-      }
+      headers
     });
     if (!teamMatchData.ok) {
       if (teamMatchData.status === 404) {
@@ -48,10 +48,7 @@ export default async function fetchGameStats(matchid, seasonNum, seasonDiv) {
 
     // 3️⃣ Fetch match stats
     let matchData = await fetch(`https://open.faceit.com/data/v4/matches/${matchid}/stats`, {
-      headers: {
-        'accept': 'application/json',
-        'Authorization': 'Bearer 29645383-3447-4a8d-90b8-76fcf5904c45'
-      }
+      headers
     });
     if (!matchData.ok) {
       if (matchData.status === 404) {

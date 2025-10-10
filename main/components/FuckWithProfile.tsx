@@ -1,5 +1,5 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Image } from "@heroui/react";
 import React from "react";
@@ -13,7 +13,7 @@ import {
   Button,
 } from "@heroui/react";
 import { Card } from "@heroui/react";
-
+import FetchLatestUsername from "@/components/FetchLatestUsername";
 import CreateStatsPage from "./CreateStatsPage";
 import StartGettingShit from "./GetAllThatFuckingShit";
 import StatsSkeleton from "./StatsSkeleton";
@@ -27,6 +27,7 @@ interface PlayerStats {
   player_name: string;
   player_id: string;
   avatar_img:string;
+  latest_player_name:string;
   count: number;
 }
 let thisSeason = 55;
@@ -142,7 +143,7 @@ let thisSeason = 55;
         avatarDiv.className = 'w-12 h-12 rounded-full cursor-pointer hover:shadow-[0_0_10px_1px_white] transition duration-200';
 
       }
-      avatarDiv.onclick = () => window.open("https://www.faceit.com/en/players/" + (member1?.user_name || member1?.player_name));
+      avatarDiv.onclick = () => window.open("https://www.faceit.com/en/players/" + (member1?.latest_player_name));
 
       console.log("AVATAR ID?? "+member1?.avatar_img);
 
@@ -215,14 +216,13 @@ let thisSeason = 55;
     });
   }
 export default function FuckWithProfile() {
-  const searchParams = useSearchParams();
+  const params = useParams();
+  const user = params.team_id as string;
 
-  if (searchParams.size == 0) {
+  if (!user) {
     window.location.href = "/home";
+    return null;
   }
-  const user = searchParams
-    .toString()
-    .substring(0, searchParams.toString().length - 1);
 
   const [data, setData] = useState<any>(null); // holds team profile
   const [TeamData, setTeamData] = useState<any>(null); // holds team stats
@@ -471,7 +471,8 @@ export default function FuckWithProfile() {
                         if(avatarsrc == ""){
                           avatarsrc = "/images/DEFAULT.jpg";
                         }
-                        PlayedPlayers.push({ player_name:player.nickname, player_id:player.player_id, avatar_img:avatarsrc, count: 1 });
+                        const latestUsername = await FetchLatestUsername(player.player_id);
+                        PlayedPlayers.push({ player_name:player.nickname, player_id:player.player_id, latest_player_name:latestUsername, avatar_img:avatarsrc, count: 1 });
                       }
                   }
                 }

@@ -5,7 +5,7 @@ import { siteConfig } from "../config/site";
 export default function StatsSkeleton() {
   return (
     <div>
-    <Card className={`w-363 py-4 mt-1 ml-2`} radius="lg">
+    <Card className={`w-screen py-4 mt-1 ml-2`} radius="lg">
       <div className={`flex w-10 h-146`}>
         <div>
           <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />

@@ -1,3 +1,26 @@
+// Helper function to get FACEIT API key
+function getFaceitApiKey() {
+  // Try to get from environment variable or global window object
+  const apiKey = process.env.NEXT_PUBLIC_FACEIT_API_KEY || window.FACEIT_API_KEY;
+  
+  if (!apiKey) {
+    const isVercel = process.env.VERCEL;
+    const location = isVercel ? 'Vercel environment variables' : '.env.local file';
+    console.error(`❌ FACEIT API key not found! Please set NEXT_PUBLIC_FACEIT_API_KEY in your ${location}`);
+    throw new Error(`FACEIT API key not found. Please set NEXT_PUBLIC_FACEIT_API_KEY in your ${location}`);
+  }
+  
+  return apiKey;
+}
+
+// Helper function to get FACEIT headers
+function getFaceitHeaders() {
+  return {
+    'accept': 'application/json',
+    'Authorization': `Bearer ${getFaceitApiKey()}`
+  };
+}
+
 window.onload = () => {
   let $search = document.querySelector('.search');
   let $root = document.querySelector('.root');
@@ -172,10 +195,8 @@ async function ClickSearch(event){
     document.getElementById("searchText").disabled = true;
 
     await fetch(`https://open.faceit.com/data/v4/search/teams?nickname=${document.getElementById("searchText").value}&game=cs2`,{
-        headers:{
-            'accept': 'application/json',
-            'Authorization': 'Bearer 503892e2-2d7b-4373-ab3e-69f53a6acdd3'
-        }})
+        headers: getFaceitHeaders()
+    })
     .then(response => {
         // Check if the request was successful (status code 200-299)
         if (!response.ok) {
@@ -198,10 +219,8 @@ async function ClickSearch(event){
         for(const team of data.items){
 
             fetch(`https://open.faceit.com/data/v4/teams/${team.team_id}`,{
-            headers:{
-                'accept': 'application/json',
-                'Authorization': 'Bearer 503892e2-2d7b-4373-ab3e-69f53a6acdd3'
-            }})
+            headers: getFaceitHeaders()
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -342,16 +361,14 @@ async function ClickSearch(event){
                     //FIX THIS SHIT LATER WHEN YOU ACTUALLY START PORT FORWARDING YOUR SERVER LOL
                     //window.location.href = `${window.location.origin}/?${team.team_id}`;
                     
-                    window.location.href = `${window.location.origin}?${team.team_id}`;
+                    window.location.href = `${window.location.origin}/${team.team_id}`;
                 })
 
 
 
             fetch(`https://open.faceit.com/data/v4/teams/${team.team_id}/stats/cs2`,{
-            headers:{
-                'accept': 'application/json',
-                'Authorization': 'Bearer 503892e2-2d7b-4373-ab3e-69f53a6acdd3'
-            }})
+            headers: getFaceitHeaders()
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

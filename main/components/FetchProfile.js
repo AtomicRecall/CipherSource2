@@ -1,26 +1,26 @@
-const API_KEY = "503892e2-2d7b-4373-ab3e-69f53a6acdd3";
-
+import { getFaceitHeaders } from "../config/api-keys";
 import fetchUpcomingMatches from "./FetchUpcomingMatches";
 
 export default async function fetchTeamProfile(teamId) {
   try {
+    const headers = getFaceitHeaders();
+    console.log("🔑 Using API headers:", headers.Authorization ? "✅ Set" : "❌ Not set");
     
     const resTeam = await fetch(`https://open.faceit.com/data/v4/teams/${teamId}`, {
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
+      headers,
     });
 
-    if (!resTeam.ok) throw new Error("Failed to fetch team info");
+    console.log("📡 API Response status:", resTeam.status);
+    if (!resTeam.ok) {
+      const errorText = await resTeam.text();
+      console.error("❌ API Error:", errorText);
+      throw new Error(`Failed to fetch team info: ${resTeam.status} - ${errorText}`);
+    }
     const teamData = await resTeam.json();
 
 
     const resTeamStats = await fetch(`https://open.faceit.com/data/v4/teams/${teamId}/stats/cs2`, {
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer ${API_KEY}`,
-      },
+      headers,
     });
 
     if (!resTeamStats.ok) throw new Error("Failed to fetch team info");
