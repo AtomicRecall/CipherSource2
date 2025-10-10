@@ -1,16 +1,7 @@
-// Helper function to get FACEIT API key
+
 function getFaceitApiKey() {
-  // Try to get from environment variable or global window object
-  const apiKey = process.env.NEXT_PUBLIC_FACEIT_API_KEY || window.FACEIT_API_KEY;
   
-  if (!apiKey) {
-    const isVercel = process.env.VERCEL;
-    const location = isVercel ? 'Vercel environment variables' : '.env.local file';
-    console.error(`❌ FACEIT API key not found! Please set NEXT_PUBLIC_FACEIT_API_KEY in your ${location}`);
-    throw new Error(`FACEIT API key not found. Please set NEXT_PUBLIC_FACEIT_API_KEY in your ${location}`);
-  }
-  
-  return apiKey;
+  return "503892e2-2d7b-4373-ab3e-69f53a6acdd3";
 }
 
 // Helper function to get FACEIT headers
