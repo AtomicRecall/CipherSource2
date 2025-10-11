@@ -1,14 +1,8 @@
-
-function getFaceitApiKey() {
-  
-  return "503892e2-2d7b-4373-ab3e-69f53a6acdd3";
-}
-
 // Helper function to get FACEIT headers
 function getFaceitHeaders() {
   return {
     'accept': 'application/json',
-    'Authorization': `Bearer ${getFaceitApiKey()}`
+    'Authorization': `Bearer 503892e2-2d7b-4373-ab3e-69f53a6acdd3`
   };
 }
 

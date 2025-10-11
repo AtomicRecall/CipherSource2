@@ -1,13 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import "@/./public/src/returnButton.css";
+import { redirect } from "next/navigation";
 
 export default function MenuButton() {
-  const router = useRouter();
 
   const handleClick = () => {
-    router.push("/home");
+    redirect("/home");
   };
 
   return (
