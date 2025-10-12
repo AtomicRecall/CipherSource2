@@ -1,4 +1,4 @@
-import { Card } from "@heroui/react";
+import { Card, Skeleton } from "@heroui/react";
 import { ResponsivePie, PieSvgProps } from "@nivo/pie";
 import React from "react";
 import { siteConfig } from "../config/site";
@@ -45,12 +45,11 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
     arcLinkLabelsThickness: 3,
     arcLinkLabelsTextColor: { from: "color", modifiers: [["darker", 1.2]] },
 
-    // 👇 Add theme overrides here
     theme: {
       labels: {
         text: {
           fontSize: 14,
-          fontWeight: "bold", // 🔥 makes arc labels bold
+          fontWeight: "bold",
         },
       },
     },
@@ -106,21 +105,23 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
                       }
                       const BannedObject =
                         type == "all"
-                          ? Banned.find((obj) => obj.map_name === slice.label)
+                          ? FirstBan.find((obj) => obj.map_name === slice.label)
                           : type == "bo1"
-                            ? bo1Banned.find(
+                            ? FirstBan.find(
                                 (obj) => obj.map_name === slice.label,
                               )
-                            : BO3Banned.find(
+                            : FirstBan.find(
                                 (obj) => obj.map_name === slice.label,
                               );
 
                       if (!BannedObject) return null;
 
-                      const FBR = parseInt(slice.value) / BannedObject.count;
+                      // Count total variables in FirstBan array
+                      const totalFirstBanCount = FirstBan.reduce((sum, obj) => sum + obj.count, 0);
+                      const FBR = parseInt(slice.value) / totalFirstBanCount;
 
                       console.log(
-                        `${parseInt(slice.value)} / ${BannedObject.count}`,
+                        `${parseInt(slice.value)} / ${totalFirstBanCount}`,
                       );
 
                       return ` | ${(parseFloat(FBR.toFixed(2)) * 100).toFixed(2)}% chance`;
@@ -130,21 +131,23 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
                       }
                       const BannedObject1 =
                         type == "all"
-                          ? Banned.find((obj) => obj.map_name === slice.label)
+                          ? SecondBan.find((obj) => obj.map_name === slice.label)
                           : type == "bo1"
-                            ? bo1Banned.find(
+                            ? SecondBan.find(
                                 (obj) => obj.map_name === slice.label,
                               )
-                            : BO3Banned.find(
+                            : SecondBan.find(
                                 (obj) => obj.map_name === slice.label,
                               );
 
                       if (!BannedObject1) return null;
 
-                      const SBR = parseInt(slice.value) / BannedObject1.count;
+                      // Count total variables in SecondBan array
+                      const totalSecondBanCount = SecondBan.reduce((sum, obj) => sum + obj.count, 0);
+                      const SBR = parseInt(slice.value) / totalSecondBanCount;
 
                       console.log(
-                        `${parseInt(slice.value)} / ${BannedObject1.count}`,
+                        `${parseInt(slice.value)} / ${totalSecondBanCount}`,
                       );
 
                       return ` | ${(parseFloat(SBR.toFixed(2)) * 100).toFixed(2)}% chance`;
@@ -154,21 +157,23 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
                       }
                       const BannedObject2 =
                         type == "all"
-                          ? Banned.find((obj) => obj.map_name === slice.label)
+                          ? ThirdBan.find((obj) => obj.map_name === slice.label)
                           : type == "bo1"
-                            ? bo1Banned.find(
+                            ? ThirdBan.find(
                                 (obj) => obj.map_name === slice.label,
                               )
-                            : BO3Banned.find(
+                            : ThirdBan.find(
                                 (obj) => obj.map_name === slice.label,
                               );
 
                       if (!BannedObject2) return null;
 
-                      const TBR = parseInt(slice.value) / BannedObject2.count;
+                      // Count total variables in ThirdBan array
+                      const totalThirdBanCount = ThirdBan.reduce((sum, obj) => sum + obj.count, 0);
+                      const TBR = parseInt(slice.value) / totalThirdBanCount;
 
                       console.log(
-                        `${parseInt(slice.value)} / ${BannedObject2.count}`,
+                        `${parseInt(slice.value)} / ${totalThirdBanCount}`,
                       );
 
                       return ` | ${(parseFloat(TBR.toFixed(2)) * 100).toFixed(2)}% chance`;
@@ -987,6 +992,7 @@ function CreateStatsPage({
                       type={"bo1"}
                     />
                   </div>
+                  {bo1WonData.length > 0 ? (
                   <div className="">
                     <PieChartWithLegend
                       data={bo1WonData}
@@ -994,12 +1000,21 @@ function CreateStatsPage({
                       type={"bo1"}
                     />
                   </div>
+                  ) : <div className="">
+                  <PieChartWithLegend
+                    data={bo1LostData}
+                    title="Maps Lost"
+                    type={"bo1"}
+                  />
+                </div>}
                 </div>
+                {bo1PickData.length > 0 ? (
                 <PieChartWithLegend
                   data={bo1PickData}
                   title="Picks"
                   type={"bo1"}
                 />
+                ) : null}
               </div>
               <div className="flex justify-center">
               <div
@@ -1041,18 +1056,19 @@ function CreateStatsPage({
                   className="overflow-x-hidden overflow-y-hidden flex justify-center"
                   style={{ height: 430 }}
                 >
+                  
                   <div className="">
                     <PieChartWithLegend
                       data={bo3PlayedData}
                       title="Maps Played"
-                      type={"bo1"}
+                      type={"bo3"}
                     />
                   </div>
                   <div className="">
                     <PieChartWithLegend
                       data={bo3WonData}
                       title="Maps Won"
-                      type={"bo1"}
+                      type={"bo3"}
                     />
                   </div>
 
@@ -1060,7 +1076,7 @@ function CreateStatsPage({
                     <PieChartWithLegend
                       data={bo3LostData}
                       title="Maps Lost"
-                      type={"bo1"}
+                      type={"bo3"}
                     />
                   </div>
                 </div>
@@ -1136,14 +1152,30 @@ function CreateStatsPage({
       </div>
     );
   } else {
-    if (!isLoading) {
+    if (isLoading) {
+      return (
+        <div>
+          <Card className={`py-4 mt-1 ml-1`} radius="lg">
+            <div className={`flex w-10 h-146`}>
+              <div>
+                <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />
+                <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />
+              </div>
+            </div>
+          </Card>
+          <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
+            <span className="text-white ">&copy; {siteConfig.copyright}</span>
+            <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>
+          </footer>
+        </div>
+      );
+    } else {
       return (
         <Card className="border rounded-lg bg-cumground flex h-154 justify-center mt-1">
           <p className="text-center text-lg text-gray-600">
             We found nothing in those matches!
           </p>
         </Card>
-
       );
     }
   }

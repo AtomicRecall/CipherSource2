@@ -5,8 +5,8 @@ import MatchNavbarSkeleton from "@/components/matchNavbarSkeleton";
 export default function CreateSkeleton() {
   return (
     <div>
-      <Card className={`space-y-5 p-4`} radius="lg">
-      <div className={`flex  gap-3`}>
+      <Card className={`space-y-5 p-3 mt-1`} radius="lg">
+      <div className={`flex gap-3`}>
         <div>
           <Skeleton className="flex rounded-medium w-35 h-35" />
         </div>
@@ -26,7 +26,7 @@ export default function CreateSkeleton() {
     </Card>
     <div className="flex mt-2">
       <div className="mr-1">
-                <MatchNavbarSkeleton />
+        <MatchNavbarSkeleton />
 
       </div>
        <StatsSkeleton/>

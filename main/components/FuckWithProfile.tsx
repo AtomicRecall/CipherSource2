@@ -812,11 +812,6 @@ export default function FuckWithProfile() {
             {navLoading ? (
               <>
                 <MatchNavbarSkeleton />
-                {document.getElementById(
-                  "onlyHereToCheckIfStuffHasBeenAppended",
-                ) ? null : (
-                  <StatsSkeleton />
-                )}
               </>
             ) : (
               <>
