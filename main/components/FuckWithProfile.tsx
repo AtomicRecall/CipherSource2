@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Image } from "@heroui/react";
 import React from "react";
@@ -217,7 +217,16 @@ let thisSeason = 55;
   }
 export default function FuckWithProfile() {
   const params = useParams();
+  const pathname = usePathname();
   const user = params.team_id as string;
+
+  console.log("🔍 FuckWithProfile rendered with user:", user, "pathname:", pathname);
+
+  // Early return if no user (team_id) or if we're not on a team route - prevents any rendering or API calls
+  if (!user || pathname === '/home' || pathname === '/') {
+    console.log("❌ No user found or not on team route, returning null");
+    return null;
+  }
 
   const [data, setData] = useState<any>(null); // holds team profile
   const [TeamData, setTeamData] = useState<any>(null); // holds team stats
@@ -267,13 +276,16 @@ export default function FuckWithProfile() {
   }
 
   useEffect(() => {
-    if (!user) {
-      // If no user (team_id), redirect to home and don't make any API calls
-      window.location.href = "/home";
+    console.log("🔄 useEffect triggered with user:", user, "pathname:", pathname);
+    
+    // Double-check that user exists and we're on a team route before making API calls
+    if (!user || pathname === '/home' || pathname === '/') {
+      console.log("❌ No user or not on team route in useEffect, skipping API call");
       return;
     }
 
     async function loadProfile() {
+      console.log("🚀 Starting to load profile for user:", user);
       setLoading(true);
       try {
         const res = await fetchTeamProfile(user); // must return a Promise
@@ -288,7 +300,7 @@ export default function FuckWithProfile() {
       }
     }
     loadProfile();
-  }, [user]);
+  }, [user, pathname]);
 
   // Auto-select thisSeason when data is loaded
   useEffect(() => {
