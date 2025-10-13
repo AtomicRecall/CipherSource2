@@ -771,14 +771,15 @@ export default function FuckWithProfile() {
                       return (
                         <div
                           key={member.user_id}
-                          className="flex flex-col items-center mt-2 mr-4 mb-3"
+                          className="flex flex-col items-center mr-4 mb-3"
                         >
-                          {member.team_role === "leader" ? (
-                            <div className="mt-4">
-                              <div className="-my-4">
-                                <p className="text text-zinc-200 z-50 text-white [text-shadow:-1px_1px_1px_black] absolute">
+                          <p className="text text-zinc-200 z-50 text-white [text-shadow:-1px_1px_1px_black] ">
                                   {member?.user_name}
                                 </p>
+                          {member.team_role === "leader" ? (
+                            <div className="">
+                              <div className="-my-4">
+                                
                                 <Image
                                   className="cursor-pointer rounded-none z-40"
                                   height={40}
@@ -789,9 +790,7 @@ export default function FuckWithProfile() {
                               </div>
                             </div>
                           ) : (
-                            <p className="text text-zinc-200 text-white [text-shadow:0px_1px_2px_black]">
-                              {member?.user_name}
-                            </p>
+                            null
                           )}
                           <div
                             className="w-12 h-12 rounded-full cursor-pointer 
