@@ -219,11 +219,6 @@ export default function FuckWithProfile() {
   const params = useParams();
   const user = params.team_id as string;
 
-  if (!user) {
-    window.location.href = "/home";
-    return null;
-  }
-
   const [data, setData] = useState<any>(null); // holds team profile
   const [TeamData, setTeamData] = useState<any>(null); // holds team stats
   const [NewData, setNewData] = useState<any>(null); // holds team stats
@@ -272,7 +267,11 @@ export default function FuckWithProfile() {
   }
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // If no user (team_id), redirect to home and don't make any API calls
+      window.location.href = "/home";
+      return;
+    }
 
     async function loadProfile() {
       setLoading(true);
