@@ -8,6 +8,7 @@ export default function MenuButton() {
 
   const handleClick = () => {
     router.push("/home");
+    router.refresh();
   };
 
   return (
