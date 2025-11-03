@@ -5,7 +5,86 @@ function getFaceitHeaders() {
     'Authorization': `Bearer 503892e2-2d7b-4373-ab3e-69f53a6acdd3`
   };
 }
+function showTypesOfInputs(){
+    try {
+        // Avoid duplicate overlays
+        // use a distinct class for this types overlay so it doesn't collide with other overlays
+        if (document.querySelector('.no-input-overlay-types')) return;
 
+    const overlay = document.createElement('div');
+        overlay.classList.add('no-input-overlay-types');
+        overlay.style.position = 'absolute';
+        overlay.style.left = '50%';
+        overlay.style.top = '220px';
+        overlay.style.transform = 'translateX(-50%)';
+        overlay.style.background = 'rgba(0, 0, 0, 0.58)';
+        overlay.style.color = 'white';
+        overlay.style.padding = '18px 22px';
+        overlay.style.borderRadius = '10px';
+        overlay.style.zIndex = '9999';
+        overlay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.6)';
+        overlay.style.maxWidth = '700px';
+        overlay.style.width = '90%';
+        overlay.style.textAlign = 'left';
+
+    const text = document.createElement('div');
+    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>';        
+        text.style.textAlign = 'left';
+        overlay.appendChild(text);
+
+
+        document.body.appendChild(overlay);
+        
+    } catch (e) {
+        console.error('showTypesOfInputs error', e);
+    }
+}
+function showOverlay() {
+    try {
+      // Avoid duplicate overlays: use the shared "links" overlay class so the home page and search page match
+      if (document.querySelector('.no-input-overlay-links')) return;
+
+      const overlay = document.createElement('div');
+      overlay.classList.add('no-input-overlay-links');
+    overlay.style.position = 'absolute';
+    overlay.style.left = '50%';
+    overlay.style.top = '50px';
+    overlay.style.transform = 'translateX(-50%)';
+    overlay.style.background = 'rgba(0, 0, 0, 0.58)';
+    overlay.style.color = 'white';
+    overlay.style.padding = '18px 22px';
+    overlay.style.borderRadius = '10px';
+    overlay.style.zIndex = '9999';
+    overlay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.6)';
+    overlay.style.maxWidth = '700px';
+    overlay.style.width = '90%';
+    overlay.style.textAlign = 'left';
+    // start invisible and fade in
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 300ms ease';
+
+        const text = document.createElement('div');
+        text.innerHTML = 'Skip this page next time by using these links:<br>- cipher.onl/search/YOUR_INPUT_HERE <br>- cipher.onl/search?YOUR_INPUT_HERE <br>- cipher.onl/search?input=YOUR_INPUT_HERE <br>Or, skip directly to the team page by using this link:<br>- cipher.onl/TEAM_ID_HERE ----MAKE SURE TO ONLY USE TEAMID FOR THIS LINK';
+        text.style.textAlign = 'left';
+        overlay.appendChild(text);
+
+
+
+  document.body.appendChild(overlay);
+  // trigger fade-in on next frame
+  requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+    // Dismiss overlay on input or typing — use the shared hide function that removes both secondary overlay variants
+    const input = document.getElementById('searchText');
+    if (input) {
+      const dismiss = () => { try { hideSecondaryOverlay(); } catch (e) { hideNoInputOverlay(); } input.removeEventListener('input', dismiss); };
+      input.addEventListener('input', dismiss);
+      input.focus();
+    }
+  } catch (e) {
+    console.error('showOverlay error', e);
+  }
+}
 window.onload = () => {
   let $search = document.querySelector('.search');
   let $root = document.querySelector('.root');
@@ -13,24 +92,30 @@ window.onload = () => {
 
 
     [$search, document.getElementById("fart")].forEach(el => {
+        
         el.addEventListener('click', (event) => {
-
+          showTypesOfInputs();
+        showOverlay();
         console.log(event.target.classList);
 
-        document.getElementById("SearchIcon").onclick = function(){
-            if(document.getElementById("searchText").value.trim() !== ""){
-                ClickSearch(event);
-
-            }
-            else{
-                alert("You wrote nothing in the input!");
-            }
+    const _searchIcon = document.getElementById("SearchIcon");
+    const _searchInput = document.getElementById("searchText");
+    if (_searchIcon) {
+      _searchIcon.onclick = function() {
+        const val = _searchInput ? _searchInput.value.trim() : '';
+        if (val !== '') {
+          // Navigate to the search route with the input as path
+          window.location.href = `/search/${encodeURIComponent(val)}`;
+        } else {
+          alert("You wrote nothing in the input!");
         }
+      };
+    }
         
             if((event.target.tagName.toLowerCase() === 'circle' || event.target.classList.contains("search-line") && event.target.classList.contains("search-icon"))){
                 
                 document.querySelector(".container .result").innerHTML = "";    
-                //ClickSearch(event);
+                
                 return;
             }
             else{
@@ -43,6 +128,7 @@ window.onload = () => {
                     document.getElementById("actualText").style.transform = "translateX(0px)";
                     
                     document.querySelector(".result").innerHTML = "";
+                    
                 }
             }
 
@@ -53,6 +139,7 @@ window.onload = () => {
         let classes = $root.classList;
         if (classes.contains('search-open') && classes.contains('search-close')) {
         classes.remove('search-close');
+        
         const searchIcon = document.querySelector('.search-icon');
         const actualText = document.getElementById('actualText');
 
@@ -70,6 +157,7 @@ window.onload = () => {
         
         } else if (classes.contains('search-open')) {
         classes.add('search-close');
+        window.location.href = "/home";
         const searchIcon = document.querySelector('.search-icon');
         const searchDivider = document.querySelector('.search');
 
@@ -152,6 +240,27 @@ window.onload = () => {
   index++;
 
   setInterval(changeHeader, 4000);
+  // Ensure the search icon in the input always works even if the user hasn't clicked elsewhere
+  const _searchIconImmediate = document.getElementById("SearchIcon");
+  const _searchInputImmediate = document.getElementById("searchText");
+  console.log('[startup] searchIcon element:', !!_searchIconImmediate, 'searchInput element:', !!_searchInputImmediate);
+  if (_searchIconImmediate) {
+    console.log('[startup] attaching click handler to #SearchIcon');
+    _searchIconImmediate.addEventListener('click', (ev) => {
+      console.log('[SearchIcon] click event fired', ev);
+      const val = _searchInputImmediate ? _searchInputImmediate.value.trim() : '';
+      console.log('[SearchIcon] current input value:', val);
+      if (val !== '') {
+        console.log('[SearchIcon] navigating to /search/' + val);
+        window.location.href = `/search/${encodeURIComponent(val)}`;
+      } else {
+        console.log('[SearchIcon] no input, alerting user');
+        alert('You wrote nothing in the input!');
+      }
+    });
+  } else {
+    console.log('[startup] #SearchIcon not found on load');
+  }
 };
 
 function fadeInViaTransition(el, duration = 500) {
@@ -164,342 +273,50 @@ function fadeInViaTransition(el, duration = 500) {
   el.style.opacity = 1;
 }
 
-async function ClickSearch(event){
 
-    //console.log(document.getElementById("searchText").value);
-
-    if (document.querySelector(".search-icon").classList.contains('search-open')){
-        document.querySelector(".search-icon").classList.remove("search-open")
-    }
-    document.querySelector(".search-icon").classList.add("moveSearch");
-    document.querySelector("#actualText .search-text").style.transform = "translate(-35px, 8px)";
-    document.querySelector(".container .text").style.width = "1750px";
-    document.querySelector(".container .text").style.transform = "translateY(-328px)";
-    document.getElementById("actualText").style.transform = "translateX(-550px)";
-    document.getElementById("actualText").style.position = "relative";
-    document.getElementById("searchText").disabled = true;
-
-    await fetch(`https://open.faceit.com/data/v4/search/teams?nickname=${document.getElementById("searchText").value}&game=cs2`,{
-        headers: getFaceitHeaders()
-    })
-    .then(response => {
-        // Check if the request was successful (status code 200-299)
-        if (!response.ok) {
-           
-
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        // Parse the response body as JSON
-        return response.json();
-    })
-    .then(data =>{
-        // Handle the fetched data
-       // console.log(data);
-        if(data.items.length < 1){
-             alert("Was not able to retrieve teams from your input!");
-             document.getElementById("searchText").disabled = false;
-             document.getElementById("searchText").value = "";
-             return;
-        }
-        for(const team of data.items){
-
-            fetch(`https://open.faceit.com/data/v4/teams/${team.team_id}`,{
-            headers: getFaceitHeaders()
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data =>{
-             //   console.log("HOLY SHIT:")
-              //  console.log(data);
-                
-                if (data.members.length < 5){
-                    return;
-                }
-                let encompassingDivider = document.createElement("div");
-                encompassingDivider.classList.add("fart");
-                encompassingDivider.style.backgroundColor = "#0000005e";
-                    let name = document.createElement("div");
-                    name.id = "name";
-                    name.innerHTML = data.name+"<a>("+data.nickname+")</a>";
-                    name.style.color = "white";
-                    encompassingDivider.appendChild(name);
-
-                    let pic = document.createElement("img");
-                    pic.src = data.avatar;
-                    if(data.avatar === undefined || data.avatar == "undefined"){
-                        pic.src = "../images/DEFAULT.jpg";
-                    }
-                    pic.style.width = "150px";
-                    pic.style.height = "150px";
-                    pic.style.borderRadius = "20px";
-                    pic.style.margin = "10px";
-                    encompassingDivider.appendChild(pic);
-
-                    let buttonsAndShit = document.createElement("div");
-                    buttonsAndShit.style.width = "250px";
-                    buttonsAndShit.style.transform = "translate(173px, -80px)";
-                    buttonsAndShit.style.overflowX = "auto";
-                    buttonsAndShit.style.height = "75px";
-                    buttonsAndShit.style.alignItems = "end";
-                    buttonsAndShit.style.overflowY = "hidden";
-                    buttonsAndShit.style.display = "flex";
-                    
-                        let faceitButton = document.createElement("img");
-                        faceitButton.src = "../images/FACEIT.png";
-                        faceitButton.id = "faceit";
-                        faceitButton.style.width = "35px";
-                        faceitButton.style.height = "30px";
-                        faceitButton.style.position = "absolute";
-                        faceitButton.style.transform = "translate(440px,165px)";
-                        faceitButton.onclick = () =>{
-                            window.open(data.faceit_url.replace("{lang}","en"), "_blank");
-                        }
-                        
-
-                        let playerPicturesAndShit = document.createElement("div");
-                        playerPicturesAndShit.style.position = "absolute";
-                        playerPicturesAndShit.style.width = "300px";
-                        playerPicturesAndShit.style.display = "flex";
-                        let playerCount = 0;
-
-                            for(const player of data.members){
-                                playerCount++;
-
-                                let playerdivider = document.createElement("div");
-                                    let picandhat = document.createElement("div");
-                                    picandhat.id = "picandhat";
-                                        let picture = document.createElement("img");
-                                        picture.src = player.avatar;
-                                        picture.style.borderRadius = "10px";
-                                        picture.style.marginRight = "5px";
-                                        picture.id = "player";
-                                        if(player.avatar == undefined || player.avatar === "undefined"){
-                                            picture.src = "../images/DEFAULT.jpg";
-                                        }
-                                        
-                                        if(player.user_id == data.leader){
-                                            let captianHat = document.createElement("img");
-                                            captianHat.src = "../images/CAPTAIN.png";
-                                            captianHat.style.height = "25px";
-                                            captianHat.style.width = "25px";
-                                            captianHat.style.position = "absolute";
-                                            captianHat.style.transform = "translate(2px, -15px)";
-                                            picandhat.classList.add("hasCaptain");
-                                            picandhat.appendChild(captianHat)
-                                        }
-                                        picandhat.appendChild(picture);
-                                    let playername = document.createElement("div");
-                                    playername.id = "playername";
-                                    playername.style.color = "white";
-                                    playername.fontSize = "1.5rem";
-                                    playername.textContent = countryCodeToFlag(player.country)+" "+player.nickname;
-                                    playerdivider.appendChild(playername);
-                                    playerdivider.appendChild(picandhat);
-                                playerPicturesAndShit.appendChild(playerdivider);
-
-                                    picture.addEventListener('mouseenter', () => {
-                                        playername.style.opacity = "1";
-                                        if(picandhat.classList.contains("hasCaptain")){
-                                            playername.style.transform = "translateY(-20px)";
-                                        }
-                                    });
-                                    picture.addEventListener('click',() => {
-                                       window.open(player.faceit_url.replace("{lang}","en"), "_blank");
-                                    })
-                                    picture.addEventListener('mouseleave', () => {
-                                      playername.style.opacity = "0";
-                                    });
-                            }
-
-                            let goToBanReaderButton = document.createElement("button");
-                            goToBanReaderButton.textContent = "Start reading Picks and Bans";
-                            goToBanReaderButton.position = "absolute";
-                            goToBanReaderButton.classList.add("GoToBanreader");
-
-                            let addtodatabasebutton = document.createElement("button");
-                            addtodatabasebutton.textContent = "+";
-                            addtodatabasebutton.position = "absolute";
-                            addtodatabasebutton.classList.add("addtodatabase");
-                        buttonsAndShit.prepend(playerPicturesAndShit);
-                    encompassingDivider.appendChild(buttonsAndShit);
-                    buttonsAndShit.after(faceitButton);
-                    encompassingDivider.appendChild(addtodatabasebutton);
-                    encompassingDivider.appendChild(goToBanReaderButton);
-                    
-                document.querySelector(".result").appendChild(encompassingDivider);
-                fadeInViaTransition(encompassingDivider, 1000);
-
-                goToBanReaderButton.addEventListener('mouseenter', () => {
-                    const randomDeg = (Math.random() * 6 - 3).toFixed(2); // Random between -2deg and 2deg
-                    goToBanReaderButton.style.transform = `translate(425px,52px) scale(1.05) rotate(${randomDeg}deg)`;
-                });
-                goToBanReaderButton.addEventListener('mouseleave', () => {
-                    goToBanReaderButton.style.transform = 'translate(425px,52px) scale(1) rotate(0deg)';
-                });
-                goToBanReaderButton.addEventListener('click', () => {
-                    console.log(team);
-                    //TODO: 
-                    //FIX THIS SHIT LATER WHEN YOU ACTUALLY START PORT FORWARDING YOUR SERVER LOL
-                    //window.location.href = `${window.location.origin}/?${team.team_id}`;
-                    
-                    window.location.href = `${window.location.origin}/${team.team_id}`;
-                })
-
-
-
-            fetch(`https://open.faceit.com/data/v4/teams/${team.team_id}/stats/cs2`,{
-            headers: getFaceitHeaders()
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            // After fetching stats data
-            .then(data => {
-                //console.log("HOLY FART");
-                //console.log(data);
-
-                // Carousel wrapper
-                let carouselWrapper = document.createElement("div");
-                carouselWrapper.classList.add("carousel-wrapper");
-
-                let carouselTrack = document.createElement("div");
-                carouselTrack.classList.add("carousel-track");
-                carouselWrapper.appendChild(carouselTrack);
-
-                // Navigation buttons
-                let prevButton = document.createElement("button");
-                prevButton.classList.add("carousel-btn", "prev");
-                prevButton.textContent = "⟨";
-
-                let nextButton = document.createElement("button");
-                nextButton.classList.add("carousel-btn", "next");
-                nextButton.textContent = "⟩";
-
-                carouselWrapper.appendChild(prevButton);
-                carouselWrapper.appendChild(nextButton);
-                pic.after(carouselWrapper)
-                //encompassingDivider.appendChild(carouselWrapper);
-
-                // Build slides
-                for (const map of data.segments) {
-                 
-                    let divider = document.createElement("div");
-                    divider.classList.add("map-divider");
-
-                    let picture = document.createElement("img");
-                    picture.src = map.img_regular;
-                    picture.style.width = "300px";
-                    picture.style.height = "150px";
-                    picture.style.transform = "translate(-100px, -18px)";
-                    picture.style.position = "absolute";
-                    picture.style.zIndex = "-10";
-                    picture.style.borderRadius = "5px";
-
-                    let label = document.createElement("div");
-                    label.textContent = map.label;
-                    label.style.transform = "translate(50px,-18px)";
-                    label.style.filter = "drop-shadow(1px 1px 1px black)";
-                    label.style.fontSize = "1.7rem";
-                    label.style.textDecoration = "underline";
-
-                    let stats = map.stats;
-                    let wins = stats.Wins;
-                    let loss = stats.Matches - wins;
-                    let rate = stats['Win Rate %'];
-
-                    let statsBox = document.createElement("div");
-                    statsBox.classList.add("map-stats");
-                    statsBox.style.filter = "drop-shadow(1px 1px 1px black)";
-                    statsBox.style.fontSize = "1.4rem";
-                    statsBox.innerHTML = `
-                        <div>Wins: <b>${wins}</b></div>
-                        <div>Losses: <b>${loss}</b></div>
-                        <div>Win Rate: <b>${rate}%</b></div>
-                    `;
-                    statsBox.style.transform = "translate(50px,-30px)";
-                    divider.appendChild(picture);
-                    divider.appendChild(label);
-                    divider.appendChild(statsBox);
-
-                    carouselTrack.appendChild(divider);
-                }
-
-                // Carousel Logic
-                let currentIndex = 0;
-                const slides = carouselTrack.querySelectorAll(".map-divider");
-                const totalSlides = slides.length;
-                
-                // mark the first slide as visible
-                if (slides[0]) slides[0].classList.add("active");
-                function updateCarousel() {
-                    carouselTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
-                    slides.forEach((s, i) => {
-                        if (i === currentIndex) {
-                        s.classList.add("active");
-                        } else {
-                        s.classList.remove("active");
-                        }
-                    });
-                }
-
-                prevButton.addEventListener("click", () => {
-                    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-                    updateCarousel();
-                    stopAutoSlide();
-                    startAutoSlide();
-                });
-
-                nextButton.addEventListener("click", () => {
-                    currentIndex = (currentIndex + 1) % totalSlides;
-                    updateCarousel();
-                    stopAutoSlide();
-                    startAutoSlide();
-                });
-
-                let autoSlideInterval = null;
-                const slideDelay = 4000; // 4 seconds per slide
-
-                function startAutoSlide() {
-                    autoSlideInterval = setInterval(() => {
-                        currentIndex = (currentIndex + 1) % totalSlides;
-                        updateCarousel();
-                    }, slideDelay);
-                }
-
-                function stopAutoSlide() {
-                    clearInterval(autoSlideInterval);
-                    autoSlideInterval = null;
-                }
-
-                // Initialize
-                updateCarousel();
-                startAutoSlide();
-            })
-            })
-            .catch(error =>{
-                // Handle any errors that occurred during the fetch operation
-                console.error('Error fetching data:', error);
-            });
-        }
-    })
-    .catch(error =>{
-        // Handle any errors that occurred during the fetch operation
-        console.error('Error fetching data:', error);
-    });
-    
-}
 document.getElementById("searchText").addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            ClickSearch(event)
-        }
-    });
+  // Case 1: Shift + Backspace → go to /home
+  if (event.shiftKey && event.key === 'Backspace') {
+    window.location.reload();
+    return;
+  }
+
+  // Case 2: Enter → go to /search/<value>
+  if (event.key === 'Enter') {
+    const input = document.getElementById('searchText');
+    const val = input ? input.value.trim() : '';
+    if (val !== '') {
+      window.location.href = `/search/${encodeURIComponent(val)}`;
+    } else {
+      alert('You wrote nothing in the input!');
+    }
+  }
+});
+    
+document.addEventListener('keydown', (event) => {
+  const target = event.target;
+  const tag = target && target.tagName;
+
+  // Ignore if user is typing in an input/textarea or contenteditable
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) return;
+
+  // Ignore combos with modifier keys (except Shift for our special case)
+  if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+  // Shift + Backspace → go to /home
+  if (event.shiftKey && event.key === 'Backspace') {
+    event.preventDefault();
+    window.location.href = '/home';
+    return;
+  }
+
+  // Space — go to /search
+  if (event.code === 'Space' || event.key === ' ') {
+    event.preventDefault(); // avoids page scroll
+    window.location.href = '/search';
+    return;
+  }
+});
 function countryCodeToFlag(code) {
     const codePoints = [...code.toUpperCase()].map(char => char.charCodeAt(0) + 127397);
     return String.fromCodePoint(...codePoints);

@@ -3,7 +3,7 @@ import fetchGameStats from "@/components/FetchGameStats.js";
 
 export default async function StartGettingShit(championshipID, teamID, seasonNum, seasonDiv) {
  // console.log("CHAMP ID: ", championshipID);
-
+  
   const res = await fetchUpcomingMatches(teamID, championshipID);
   const fart = await res.json();
 //console.log(fart.payload.items)

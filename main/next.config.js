@@ -17,6 +17,21 @@ const nextConfig = {
                 source: '/home',
                 destination: '/home.html',
             },
+            {
+                source: '/search',
+                destination: '/search.html',
+            },
+        ];
+    },
+    // Server-side redirects: map path-style /search/<slug> to query-style /search?<slug>
+    async redirects() {
+        return [
+            {
+                source: '/search/:input',
+                // Redirect path-style /search/<input> (single segment) to query-style /search?input=<input>
+                destination: '/search?input=:input',
+                permanent: false,
+            },
         ];
     },
 };

@@ -10,7 +10,12 @@ export default async function fetchLatestUsername(playerId) {
   
       if (!resPlayer.ok) throw new Error("Failed to fetch player info");
       const PlayerData = await resPlayer.json();
-      return PlayerData.nickname;
+      console.log("GET YOUR BOOTYHOLE DOWN: ",PlayerData);
+      const playerInfo = {
+        nickname: PlayerData.nickname,
+        avatar: PlayerData.avatar
+      };
+      return playerInfo;
     } catch (error) {
       console.error("Error fetching latest username:", error);
       return null; // or return a default value like playerId

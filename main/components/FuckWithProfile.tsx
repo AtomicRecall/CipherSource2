@@ -31,6 +31,8 @@ interface PlayerStats {
   count: number;
 }
 let thisSeason = 55;
+const SEASON_LOGO_STANDARD = 30;
+const SEASON_LOGO_SMALL = 23;
 
 
   const OpenPlayerName =
@@ -40,28 +42,6 @@ let thisSeason = 55;
       window.open("https://www.faceit.com/en/players/" + name);
       // Your custom logic here
     };
-  function addRosterSkeletonForSeason(season: any) {
-    const container = document.getElementById("PoopEater");
-    if (!container) {
-      console.log("PoopEater container not found!");
-      return;
-    }
-
-    console.log(`Adding skeleton for season ${season} to PoopEater container`);
-
-    // Create a container div for the React component
-    const skeletonContainer = document.createElement('div');
-    skeletonContainer.id = `roster-skeleton-${season}`;
-    
-    // Append the container to PoopEater
-    container.appendChild(skeletonContainer);
-    
-    // Render the RosterSkeleton React component
-    const root = createRoot(skeletonContainer);
-    root.render(React.createElement(RosterSkeleton));
-    
-    console.log(`Skeleton for season ${season} added to PoopEater`);
-  }
 
   function addRosterForSeason(memberz:any, season:any){
     const container = document.getElementById("PoopEater");
@@ -238,6 +218,7 @@ export default function FuckWithProfile() {
   );
   const [uiNode, setUiNode] = useState<React.ReactElement[]>([]);
   const [navLoading, setNavLoading] = useState(false);
+  const [loadingSeasonKeys, setLoadingSeasonKeys] = useState<Set<string>>(new Set());
   const [needsPlaceholder, setneedsPlaceholder] = useState(false); // Changed to false since we'll have a default selection
 
   // ✅ Clear sessionStorage once on page load
@@ -305,29 +286,40 @@ export default function FuckWithProfile() {
   // Auto-select thisSeason when data is loaded
   useEffect(() => {
     if (data?.leagues?.[0]?.league_seasons_info && selectedKeys.size === 0) {
-      // Find the season matching thisSeason
-      const currentSeason = data.leagues[0].league_seasons_info.find(
-        (season: any) => season.season_number == thisSeason
-      );
-      
-      if (currentSeason?.season_standings?.length > 0) {
-        const currentSeasonKey = `S${currentSeason.season_number} ${currentSeason.season_standings[0].division_name}`;
-        const newSelectedKeys = new Set([currentSeasonKey]);
-        setSelectedKeys(newSelectedKeys);
-        
-        // Trigger the selection logic for thisSeason with proper Set structure
-        // We need to create a mock object that mimics what the dropdown passes
-        const mockKeys = new Set([currentSeasonKey]);
-        // Add currentKey property to the Set for compatibility
-        (mockKeys as any).currentKey = currentSeasonKey;
-        handleSelectionChange(mockKeys);
+      // Helper to attempt selecting a season by number
+      const trySelectSeasonAndDivision = (seasonNumber: number, division:string) => {
+        const seasonObj = data.leagues[0].league_seasons_info.find(
+          (s: any) => Number(s.season_number) === Number(seasonNumber),
+        );
+
+        if (seasonObj && seasonObj.season_standings?.length > 0) {
+        const seasonKey = `S${seasonObj.season_number} ${division}`;
+          const newSelectedKeys = new Set([seasonKey]);
+          setSelectedKeys(newSelectedKeys);
+
+          // Construct a mock keys object compatible with Dropdown's expected shape
+          const mockKeys = new Set([seasonKey]) as any;
+          mockKeys.currentKey = seasonKey;
+          handleSelectionChange(mockKeys);
+          return true;
+        }
+        return false;
+      };
+
+      // Try configured thisSeason first; if it has no results, fall back to thisSeason - 1
+      const primary = Number(thisSeason);
+      const seasonObj = data.leagues[0].league_seasons_info.find(
+          (s: any) => Number(s.season_number) === Number(primary),
+        );
+      if (!trySelectSeasonAndDivision(primary,seasonObj.season_standings[0][0].division_name)) {
+        // Try previous season as fallback
+        trySelectSeasonAndDivision(primary,seasonObj.season_standings[0][1].division_name);
       }
     }
   }, [data, selectedKeys.size]);
   const OpenTeamName = (event: React.MouseEvent<HTMLParagraphElement>) => {
     event.preventDefault(); // if needed
     event.stopPropagation(); // if needed
-    console.log("Team name clicked!", event);
     window.open("https://www.faceit.com/en/teams/" + data.teamdata?.team_id);
     // Your custom logic here
   };
@@ -336,12 +328,32 @@ export default function FuckWithProfile() {
 
 
   const handleSelectionChange = async (keys: any) => {
+    // Determine sizes: previous (from state) and current (from incoming keys)
+    const prevSize = selectedKeys?.size ?? 0;
+    const curSize = keys?.size ?? 0;
+
+    // Determine added and removed keys (strings)
+    const prevSet = selectedKeys ?? new Set<string>();
+    const prevArr = Array.from(prevSet);
+    const curArr = Array.isArray(keys) ? keys : Array.from(keys as Set<string>);
+    const added = curArr.filter((k: string) => !prevSet.has(k));
+    const removed = prevArr.filter((k: string) => !(keys as Set<string>).has(k));
+
+    // If any removed key is currently loading, block the removal
+    const tryingToRemoveLoading = removed.some((k) => loadingSeasonKeys.has(k));
+    if (tryingToRemoveLoading) {
+
+      // Revert UI to previous selected keys
+      setSelectedKeys(new Set(prevArr));
+      return;
+    }
+
+    // Accept the change (additions or allowed removals)
     setSelectedKeys(keys);
     setneedsPlaceholder(false);
     console.log(keys);
 
     let B4Size = 0;
-    let curSize = keys.size;
     let lastList: any[] = [];
 
     if (typeof window !== "undefined" && window.sessionStorage) {
@@ -374,49 +386,78 @@ export default function FuckWithProfile() {
 
     if (B4Size - curSize < 0) {
       console.log("ADD "+parseInt(keys.currentKey.substring(1, 3)));
+
+      const currentKey = keys.currentKey;
+      // mark this season as loading (used to block removals and show spinner)
+      setLoadingSeasonKeys((prev) => {
+        const copy = new Set(prev);
+        copy.add(currentKey);
+        return copy;
+      });
+
       setNavLoading(true);
-      
-      // Add skeleton for the season being loaded
-      const seasonNumber = parseInt(keys.currentKey.substring(1, 3));
-      if (seasonNumber != thisSeason) {
-        addRosterSkeletonForSeason(seasonNumber);
-      }
-      
+
+
       for (const season of data.leagues[0].league_seasons_info) {
-        if (season.season_number == parseInt(keys.currentKey.substring(1, 3))) {
+        console.log("CHECK SEASON ",season.season_number);
+        console.log("CURRENT KEY SEASON ",parseInt(keys.currentKey.substring(1, 3)));
+        if (parseInt(season.season_number) === parseInt(keys.currentKey.substring(1, 3))) {
           let GotAllMyShit = [];
+            
+            for (const standing of season.season_standings) {
+            console.log("JON HAS A FUNNY PENIS !!! ",standing);
+            for(const eachDivision of standing){
+              console.log("something ",eachDivision.division_name);
+              console.log("something clicked",keys.currentKey.substring(4))
+              if(eachDivision.division_name == keys.currentKey.substring(4)){
+                const GotMyShit = await StartGettingShit(
+                  eachDivision.championship_id,
+                  data.teamdata?.team_id,
+                  parseInt(keys.currentKey.substring(1)),
+                  eachDivision.division_name,
+                );
+                eachDivision.SeasonNumber = season.season_number;
+                console.log("Cogt my shit? ",GotMyShit)
+                for (const eachmatch of GotMyShit) {
+                  GotAllMyShit.push(eachmatch);
+                }
+                
+              }
+                  
 
-          for (const standing of season.season_standings) {
-            const GotMyShit = await StartGettingShit(
-              standing.championship_id,
-              data.teamdata?.team_id,
-              parseInt(keys.currentKey.substring(1)),
-              keys.currentKey.substring(4),
-            );
-
-            standing.SeasonNumber = season.season_number;
-
-            for (const eachmatch of GotMyShit) {
-              GotAllMyShit.push(eachmatch);
+                
+                
+                
+              
             }
-          }
+              
+            
 
-          console.log("cum ", season);
+            
+
+            }
+          
+          
+            console.log("GOT ALL MY FUCING SHIT??? ",GotAllMyShit);
+            console.log("UMMMM??? ",season);
           GotAllMyShit.sort(
             (a: any, b: any) =>
               b.teamMatchData.finished_at - a.teamMatchData.finished_at,
           );
           if(B4Size == 0){
+            console.log("WHAT IS IN HERE ??? ",season);
             setUiNode((prev) => [
             <div
-              key={`S${season.season_number}-${season.season_standings[0].division_name}`}
-              id={`S${season.season_number} ${season.season_standings[0].division_name}`}
+              key={`S${season.season_number}-${keys.currentKey.substring(4)}`}
+              id={`S${season.season_number} ${keys.currentKey.substring(4)}`}
               className=""
             >
               {CreateMatchNavbar(
                 GotAllMyShit,
                 data.teamdata.team_id,
                 season.season_standings,
+                season.season_number,
+                keys.currentKey.substring(4),
               )}
             </div>,
           ]);
@@ -425,14 +466,16 @@ export default function FuckWithProfile() {
             setUiNode((prev) => [
             ...prev,
             <div
-              key={`S${season.season_number}-${season.season_standings[0].division_name}`}
-              id={`S${season.season_number} ${season.season_standings[0].division_name}`}
+              key={`S${season.season_number}-${keys.currentKey.substring(4)}`}
+              id={`S${season.season_number} ${keys.currentKey.substring(4)}`}
               className=""
             >
               {CreateMatchNavbar(
                 GotAllMyShit,
                 data.teamdata.team_id,
                 season.season_standings,
+                season.season_number,
+                keys.currentKey.substring(4),
               )}
             </div>,
           ]);
@@ -482,8 +525,8 @@ export default function FuckWithProfile() {
                         if(avatarsrc == ""){
                           avatarsrc = "/images/DEFAULT.jpg";
                         }
-                        const latestUsername = await FetchLatestUsername(player.player_id);
-                        PlayedPlayers.push({ player_name:player.nickname, player_id:player.player_id, latest_player_name:latestUsername, avatar_img:avatarsrc, count: 1 });
+                        const latest = await FetchLatestUsername(player.player_id);
+                        PlayedPlayers.push({ player_name:player.nickname, player_id:player.player_id, latest_player_name:latest?.nickname, avatar_img:latest?.avatar, count: 1 });
                       }
                   }
                 }
@@ -496,7 +539,15 @@ export default function FuckWithProfile() {
              addRosterForSeason(PlayedPlayers, season.season_number)
 
           }
-          setNavLoading(false);
+          // Remove this season from loading set and update navLoading
+          setLoadingSeasonKeys((prev) => {
+            const copy = new Set(prev);
+            copy.delete(currentKey);
+            // update global navLoading based on remaining loading seasons
+            setNavLoading(copy.size > 0);
+            return copy;
+          });
+
           setneedsPlaceholder(false);
 
           return;
@@ -510,6 +561,7 @@ export default function FuckWithProfile() {
       );
 
       // Find elements in lastList that are missing in nowList
+      const removedIds: string[] = [];
       for (const eachthinginlist of lastList) {
         let found = false;
 
@@ -522,12 +574,15 @@ export default function FuckWithProfile() {
 
         if (!found) {
           console.log("Removed item:" + eachthinginlist + "-");
+          removedIds.push(eachthinginlist);
           // Do something with the removed item here
-          document.getElementById(eachthinginlist)?.remove();
           
-          // Extract season number from the removed item and remove its roster
+          // Extract season number from the removed item and remove its roster only if no other divisions from this season are selected
           const seasonNumber = eachthinginlist.substring(1, 3);
-          removeRosterForSeason(seasonNumber);
+          const stillHasSeason = Array.from(selectedKeys).some(key => key.startsWith(`S${seasonNumber}`));
+          if (!stillHasSeason) {
+            removeRosterForSeason(seasonNumber);
+          }
           
           if (lastList.length == 1) {
             setneedsPlaceholder(true);
@@ -535,9 +590,11 @@ export default function FuckWithProfile() {
           let newData = [];
 
           for (const eachMatch of TeamData) {
+            console.log("WHAT THE BALLSACK ",eachMatch);
             if (
               !(
-                eachMatch.matchData.seasonNum == eachthinginlist.substring(1, 3)
+                eachMatch.matchData.seasonNum == eachthinginlist.substring(1, 3) &&
+                eachMatch.matchData.Division == eachthinginlist.substring(4)
               )
             ) {
               newData.push(eachMatch);
@@ -547,6 +604,8 @@ export default function FuckWithProfile() {
           setTeamData(newData);
         }
       }
+      // Update uiNode to remove the corresponding elements
+      setUiNode(prev => prev.filter(node => !removedIds.includes(node.props.id)));
     } else {
       console.log("NOTHING GOT CLICKED YO");
     }
@@ -576,10 +635,7 @@ export default function FuckWithProfile() {
                 <div className="flex ">
                   <div className="text-5xl mr-2 -mt-1 ">
                     <Flag
-                      countryCode={
-                        data.leagues[0].league_seasons_info[0]
-                          .season_standings[0].region_name
-                      }
+                      countryCode={data.leagues[0].league_seasons_info[0].season_standings["0"][0].region_name}
                     />
                   </div>
                   <p
@@ -612,35 +668,36 @@ export default function FuckWithProfile() {
                               >
                                 {selectedKeys.size > 0 ? (
                                   <div className="flex gap-1">
-                                    {Array.from(selectedKeys)
-                                      .sort((a, b) => {
-                                        const aNum = parseInt(
-                                          a.substring(1, 3),
-                                          10,
-                                        );
-                                        const bNum = parseInt(
-                                          b.substring(1, 3),
-                                          10,
-                                        );
-
-                                        return bNum - aNum; // descending
-                                      })
-                                      .map((key) => (
-                                        <Image
-                                          key={key}
-                                          alt={`Season ${key} Logo`}
-                                          height={30}
-                                          src={`images/S${key.substring(1, 3)}logo.png`}
-                                          width={
-                                            !(
-                                              key.substring(1, 3) === "51" ||
-                                              key.substring(1, 3) === "50"
-                                            )
-                                              ? 30
-                                              : 23
-                                          }
-                                        />
-                                      ))}
+                                      {Array.from(new Set(Array.from(selectedKeys).map(key => key.substring(1, 3))))
+                                        .sort((a, b) => parseInt(b, 10) - parseInt(a, 10)) // descending
+                                        .map((seasonNum) => {
+                                          // Check if any division of this season is loading
+                                          const isLoading = Array.from(selectedKeys)
+                                            .filter(key => key.startsWith(`S${seasonNum}`))
+                                            .some(key => loadingSeasonKeys.has(key));
+                                          return (
+                                            <div key={seasonNum} className="relative w-8 h-8 flex items-center justify-center">
+                                                  <Image
+                                                    alt={`Season ${seasonNum} Logo`}
+                                                    height={seasonNum === "51" || seasonNum === "50" ? SEASON_LOGO_SMALL : SEASON_LOGO_STANDARD}
+                                                    src={`images/S${seasonNum}logo.png`}
+                                                    width={seasonNum === "51" || seasonNum === "50" ? SEASON_LOGO_SMALL : SEASON_LOGO_STANDARD}
+                                                    // ensure the logo sits in a lower stacking context so the overlayed spinner (z-50) is always visible
+                                                    className={isLoading ? "opacity-60 relative z-0" : "relative z-0"}
+                                                  />
+                                              {isLoading && (
+                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+                                                  <div className="bg-black/50 rounded-full p-1">
+                                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                                    </svg>
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
                                   </div>
                                 ) : (
                                   "Choose ESEA Season"
@@ -655,6 +712,7 @@ export default function FuckWithProfile() {
                               selectionMode="multiple"
                               variant="shadow"
                               onSelectionChange={handleSelectionChange}
+                              hideSelectedIcon={true}
                             >
                               {data.leagues[0].league_seasons_info.map(
                                 (league: any) => {
@@ -663,86 +721,121 @@ export default function FuckWithProfile() {
                                   for (const poopfart of league.season_standings) {
                                     standing.push(poopfart);
                                   }
+                                  console.log("WHAT IS THIS STANDING HERE!! ",standing);
 
-                                  if (
-                                    !standing ||
-                                    `${standing[0].placement.left}` == "0"
-                                  )
-                                    return null;
-                                  if (standing.length > 1) {
-                                    return (
-                                      <DropdownItem
-                                        key={`S${league.season_number} ${standing[0].division_name}`}
-                                        startContent={
-                                          <div className={"w-[30px]"}>
-                                            <Image
-                                              className={
-                                                !(
-                                                  league.season_number ==
-                                                    "51" ||
-                                                  league.season_number == "50"
-                                                )
-                                                  ? ""
-                                                  : "ml-1"
-                                              }
-                                              height={30}
-                                              src={`images/S${league.season_number}logo.png`}
-                                              width={
-                                                !(
-                                                  league.season_number ==
-                                                    "51" ||
-                                                  league.season_number == "50"
-                                                )
-                                                  ? 30
-                                                  : 23
-                                              }
-                                            />
-                                          </div>
-                                        }
-                                      >
-                                        {`S${league.season_number} ${standing[0].division_name} `}
-                                        : ({standing[1].wins} /{" "}
-                                        {standing[1].losses}) PO: (
-                                        {standing[0].wins} /{" "}
-                                        {standing[0].losses})
-                                      </DropdownItem>
-                                    );
-                                  } else {
-                                    return standing.map((type: any) => (
-                                      <DropdownItem
-                                        key={`S${league.season_number} ${type.division_name}`}
-                                        startContent={
-                                          <div className={"w-[30px]"}>
-                                            <Image
-                                              className={
-                                                !(
-                                                  league.season_number ==
-                                                    "51" ||
-                                                  league.season_number == "50"
-                                                )
-                                                  ? ""
-                                                  : "ml-1"
-                                              }
-                                              height={30}
-                                              src={`images/S${league.season_number}logo.png`}
-                                              width={
-                                                !(
-                                                  league.season_number ==
-                                                    "51" ||
-                                                  league.season_number == "50"
-                                                )
-                                                  ? 30
-                                                  : 23
-                                              }
-                                            />
-                                          </div>
-                                        }
-                                      >
-                                        {`S${league.season_number} ${type.division_name} `}
-                                        : ({type.wins} / {type.losses})
-                                      </DropdownItem>
-                                    ));
-                                  }
+                                  // compute the common key used by dropdown
+                                  const baseKey = `S${league.season_number}`;
+
+                                  if (standing.length >= 1) {
+  console.log("JON HAS A MILENKI PENIS ", standing);
+  const items = [];
+  for (const eachDivision of standing) {
+    console.log(`EACH FRIGGEN DIVISION SEASON ${league.season_number}`, eachDivision);
+
+    if (eachDivision["1"] && eachDivision["0"].division_name === eachDivision["1"].division_name) {
+      const itemKey = `${baseKey} ${eachDivision["0"].division_name}`;
+      const isLoading = loadingSeasonKeys.has(itemKey);
+      items.push(
+        <DropdownItem
+          key={itemKey}
+          className={isLoading ? "opacity-60" : undefined}
+          startContent={
+            <div className={"min-w-[30px] flex items-center justify-center relative"}>
+              <Image
+                className={
+                  !(
+                    league.season_number === "51" ||
+                    league.season_number === "50"
+                  )
+                    ? ""
+                    : ""
+                }
+                height={league.season_number === "51" || league.season_number === "50" ? 40 : SEASON_LOGO_STANDARD}
+                width={league.season_number === "51" || league.season_number === "50" ? 35 : SEASON_LOGO_STANDARD}
+                src={`images/S${league.season_number}logo.png`}
+              />
+            </div>
+          }
+          endContent={
+            isLoading ? (
+              <div className="mr-2 flex items-center">
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+              </div>
+            ) : selectedKeys.has(itemKey) ? (
+              <div className="mr-2 flex items-center">
+                <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.14 7.14a1 1 0 01-1.415 0l-3.06-3.06a1 1 0 111.415-1.415l2.353 2.353 6.433-6.433a1 1 0 011.415 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+            ) : (
+              <div className="mr-2 w-4" />
+            )
+          }
+          description={`(${eachDivision["1"].wins} / ${eachDivision["1"].losses}) PO: (${eachDivision["0"].wins} / ${eachDivision["0"].losses})`}
+        >
+          {`S${league.season_number} ${eachDivision["0"].division_name}`}
+        </DropdownItem>
+      );
+    } else {
+      // This means the team is in Elite and some other division (Main, Adv)
+      console.log("POOOOOOP", league);
+      const divisionItems = eachDivision.map(eachdivisions => {
+        console.log("WHAT? ", eachdivisions);
+        const itemKey = `${baseKey} ${eachdivisions.division_name}`;
+        const isLoading = loadingSeasonKeys.has(itemKey);
+        return (
+          <DropdownItem
+            key={itemKey}
+            className={isLoading ? "opacity-60" : undefined}
+            startContent={
+              <div className={"min-w-[30px] flex items-center justify-center relative"}>
+                <Image
+                  className={
+                    !(
+                      league.season_number === "51" ||
+                      league.season_number === "50"
+                    )
+                      ? ""
+                      : ""
+                  }
+                  height={league.season_number === "51" || league.season_number === "50" ? 40 : SEASON_LOGO_STANDARD}
+                  width={league.season_number === "51" || league.season_number === "50" ? 35 : SEASON_LOGO_STANDARD}
+                  src={`images/S${league.season_number}logo.png`}
+                />
+              </div>
+            }
+            endContent={
+              isLoading ? (
+                <div className="mr-2 flex items-center">
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                </div>
+              ) : selectedKeys.has(itemKey) ? (
+                <div className="mr-2 flex items-center">
+                  <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.14 7.14a1 1 0 01-1.415 0l-3.06-3.06a1 1 0 111.415-1.415l2.353 2.353 6.433-6.433a1 1 0 011.415 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              ) : (
+                <div className="mr-2 w-4" />
+              )
+            }
+            description={`(${eachdivisions.wins} / ${eachdivisions.losses})`}
+          >
+            {`S${league.season_number} ${eachdivisions.division_name}`}
+          </DropdownItem>
+        );
+      });
+      items.push(...divisionItems);
+    }
+  }
+  return items;
+}
                                 },
                               )}
                             </DropdownMenu>

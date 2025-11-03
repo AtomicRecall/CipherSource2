@@ -1,7 +1,10 @@
-import { Card, Skeleton } from "@heroui/react";
+import { Card, colors, Skeleton } from "@heroui/react";
 import { ResponsivePie, PieSvgProps } from "@nivo/pie";
 import React from "react";
 import { siteConfig } from "../config/site";
+import { MyBarCanvas } from "./CreateBarGraph";
+import CreateIcicleGraph from "./CreateIcicleGraph";
+
 
 interface CreateStatsPageProps {
   needsPlaceholder: boolean;
@@ -16,6 +19,31 @@ interface PieChartWithLegendProps {
   type: string;
   data: { id: string; label: string; value: string; color: string }[];
 }
+
+// Transform maps data for bar chart
+const transformMapsDataForBarChart = (mapsData: any, winsData: any = [], lossesData: any = []) => {
+  // Assuming mapsData is an array of objects with map names and play counts
+  // Example: [{ map_name: "de_dust2", count: 15 }, { map_name: "de_mirage", count: 12 }]
+  
+  return mapsData.map((mapData: any, index: number) => {
+    const mapName = mapData.map_name || `Map ${index + 1}`;
+    const totalPlayed = mapData.count || 0;
+    
+    // Find corresponding wins and losses for this map
+    const winEntry = winsData.find((w: any) => w.map_name === mapName);
+    const lossEntry = lossesData.find((l: any) => l.map_name === mapName);
+    
+    const wins = winEntry?.count || 0;
+    const losses = lossEntry?.count || 0;
+    
+    return {
+      country: mapName,
+      wins: wins,
+      losses: losses,
+      totalPlayed: totalPlayed, // Add total played for win rate calculation
+    };
+  });
+};
 
 const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
   title,
@@ -35,155 +63,52 @@ const PieChartWithLegend: React.FC<PieChartWithLegendProps> = ({
   const commonProperties: Partial<
     PieSvgProps<{ id: string; label: string; value: string; color: string }>
   > = {
+    enableArcLinkLabels: false,
     data: pieData,
-    margin: { top: 40, right: 40, bottom: 60, left: 40 },
-    innerRadius: 0.6,
-    padAngle: 0.5,
-    cornerRadius: 5,
+    animate: true,
+    margin: { top: 40, right: 0, bottom: 20, left: 0 },
+    arcLabel: (e: any) => {
+  return  ` (${e.value})`;
+},
+    arcLabelsTextColor:{ from: "color"},
+    innerRadius: 0.3,
+    padAngle: 3,
+    cornerRadius: 15,
+
     colors: (d: any) => (d.data as any).color as string,
     arcLinkLabelsColor: { from: "color" },
-    arcLinkLabelsThickness: 3,
+    arcLinkLabelsThickness: 0,
     arcLinkLabelsTextColor: { from: "color", modifiers: [["darker", 1.2]] },
-
+    
     theme: {
+      legends:{
+
+      },
       labels: {
         text: {
-          fontSize: 14,
+          fontSize: 28,
           fontWeight: "bold",
+          textShadow: '1px 1px 1px rgba(0, 0, 0, 1)',
         },
       },
+      
     },
   };
+  const normalizeKey = (raw: string) => {
+  if (!raw) return '';
+  const m = raw.match(/de_([a-z0-9_]+)/i);
+  if (m && m[1]) return m[1].toLowerCase();
+
+  return raw.replace(/^de_/, '').toLowerCase().split(/[^a-z0-9]+/)[0];
+};
   return (
     <div
       className="flex flex-col items-center"
-      style={{ width: 420, minWidth: 400 }}
+      style={{ width: "550px" }}
     >
       <h2 className="text-white text-lg font-bold">{title}</h2>
-      <div className="-mt-6" style={{ height: 300, width: "130%" }}>
+      <div className="-mt-6" style={{ height: 300, width: "100%" }}>
         <ResponsivePie {...(commonProperties as any)} />
-      </div>
-      <div className="flex flex-col gap-2 text-white -mt-9">
-        {pieData
-          .slice() // create a shallow copy so the original data isn't mutated
-          .sort((a: any, b: any) => b.value - a.value) // descending order (largest → smallest)
-          .map((slice) => (
-            <div key={slice.id} className="flex items-center gap-2">
-              <div
-                style={{
-                  width: swatchSize,
-                  height: swatchSize,
-                  backgroundColor: slice.color,
-                  borderRadius: 4,
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: `${legendFontSize}px`, lineHeight: 1 }}>
-                {slice.label}: {slice.value}
-                {(() => {
-                  switch (title) {
-                    case "Maps Won":
-                      const playedObj =
-                        type == "all"
-                          ? Played.find((obj) => obj.map_name === slice.label)
-                          : type == "bo1"
-                            ? bo1Played.find(
-                                (obj) => obj.map_name === slice.label,
-                              )
-                            : bo3Played.find(
-                                (obj) => obj.map_name === slice.label,
-                              );
-
-                      if (!playedObj) return null;
-
-                      const wr = parseInt(slice.value) / playedObj.count;
-
-                      return ` | WR: ${(parseFloat(wr.toFixed(2)) * 100).toFixed(2)}%`;
-                    case "First Ban":
-                      if (type == "all") {
-                        break;
-                      }
-                      const BannedObject =
-                        type == "all"
-                          ? FirstBan.find((obj) => obj.map_name === slice.label)
-                          : type == "bo1"
-                            ? FirstBan.find(
-                                (obj) => obj.map_name === slice.label,
-                              )
-                            : FirstBan.find(
-                                (obj) => obj.map_name === slice.label,
-                              );
-
-                      if (!BannedObject) return null;
-
-                      // Count total variables in FirstBan array
-                      const totalFirstBanCount = FirstBan.reduce((sum, obj) => sum + obj.count, 0);
-                      const FBR = parseInt(slice.value) / totalFirstBanCount;
-
-                      console.log(
-                        `${parseInt(slice.value)} / ${totalFirstBanCount}`,
-                      );
-
-                      return ` | ${(parseFloat(FBR.toFixed(2)) * 100).toFixed(2)}% chance`;
-                    case "Second Ban":
-                      if (type == "all") {
-                        break;
-                      }
-                      const BannedObject1 =
-                        type == "all"
-                          ? SecondBan.find((obj) => obj.map_name === slice.label)
-                          : type == "bo1"
-                            ? SecondBan.find(
-                                (obj) => obj.map_name === slice.label,
-                              )
-                            : SecondBan.find(
-                                (obj) => obj.map_name === slice.label,
-                              );
-
-                      if (!BannedObject1) return null;
-
-                      // Count total variables in SecondBan array
-                      const totalSecondBanCount = SecondBan.reduce((sum, obj) => sum + obj.count, 0);
-                      const SBR = parseInt(slice.value) / totalSecondBanCount;
-
-                      console.log(
-                        `${parseInt(slice.value)} / ${totalSecondBanCount}`,
-                      );
-
-                      return ` | ${(parseFloat(SBR.toFixed(2)) * 100).toFixed(2)}% chance`;
-                    case "Third Ban":
-                      if (type == "all") {
-                        break;
-                      }
-                      const BannedObject2 =
-                        type == "all"
-                          ? ThirdBan.find((obj) => obj.map_name === slice.label)
-                          : type == "bo1"
-                            ? ThirdBan.find(
-                                (obj) => obj.map_name === slice.label,
-                              )
-                            : ThirdBan.find(
-                                (obj) => obj.map_name === slice.label,
-                              );
-
-                      if (!BannedObject2) return null;
-
-                      // Count total variables in ThirdBan array
-                      const totalThirdBanCount = ThirdBan.reduce((sum, obj) => sum + obj.count, 0);
-                      const TBR = parseInt(slice.value) / totalThirdBanCount;
-
-                      console.log(
-                        `${parseInt(slice.value)} / ${totalThirdBanCount}`,
-                      );
-
-                      return ` | ${(parseFloat(TBR.toFixed(2)) * 100).toFixed(2)}% chance`;
-                  }
-
-                  return null; // fallback if no condition matched
-                })()}
-              </span>
-            </div>
-          ))}
       </div>
     </div>
   );
@@ -215,6 +140,7 @@ export function resetGlobalArrays() {
   bo1Won = [];
   bo1Lost = [];
   bo3Won = [];
+  bo3Lost=[];
 }
 // Returns a color based on the map name
 function whatColor(mapname: string): string {
@@ -285,6 +211,7 @@ function CreateStatsPage({
   W = [];
   L = [];
   Banned = [];
+  BO3Banned = [];
   Picks = [];
   FirstBan = [];
   SecondBan = [];
@@ -305,6 +232,7 @@ function CreateStatsPage({
   bo1Won = [];
   bo1Lost = [];
   bo3Won = [];
+  bo3Lost=[];
 
   console.log("NO FUCKING WAY ", stats);
   
@@ -323,9 +251,9 @@ function CreateStatsPage({
         </p>
         
       </Card>
-                    <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
-                    <span className="text-white ">&copy; {siteConfig.copyright}</span>
-                    <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>
+              <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
+                <span className="text-white ">&copy; {siteConfig.copyright}</span>
+                <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>
               </footer>
       </div>
 
@@ -379,7 +307,13 @@ function CreateStatsPage({
         case 1:
           bo1s.push(eachGame);
           break;
+        case 2:
+          bo1s.push(eachGame);
+          break;
         case 3:
+          bo3s.push(eachGame);
+          break;
+        case 4:
           bo3s.push(eachGame);
           break;
         case 5:
@@ -570,22 +504,22 @@ function CreateStatsPage({
     const bo3PlayedData = [];
     const bo3WonData = [];
     const bo3LostData = [];
-
+    
     if (bo3s.length > 0) {
       for (const eachBo3 of bo3s) {
         let numPick = 0;
         let numBan = 0;
         for (const Round of eachBo3.matchData.rounds){
           let round_stats = Round.round_stats;
-        const Object = bo3Played.find(
-          (obj) => obj.map_name === round_stats.Map,
-        );
+          const Object = bo3Played.find(
+            (obj) => obj.map_name === round_stats.Map,
+          );
 
-        if (Object) {
-          Object.count += 1;
-        } else {
-          bo3Played.push({ map_name: round_stats.Map, count: 1 });
-        }
+          if (Object) {
+            Object.count += 1;
+          } else {
+            bo3Played.push({ map_name: round_stats.Map, count: 1 });
+          }
 
         if (round_stats.Winner == SelectedTeam) {
           const Object = bo3Won.find((obj) => obj.map_name === round_stats.Map);
@@ -935,39 +869,23 @@ function CreateStatsPage({
 
     return (
       <div>
-      <Card className="p-4 border rounded-lg bg-cumground flex flex-col mt-1 justify-center w-full">
+      <Card className="p-4 border rounded-lg bg-cumground flex flex-col mt-1 justify-center w-full overflow-hidden">
         <div
-          className="overflow-y-hidden overflow-x-hidden"
+          className="overflow-hidden w-full"
           id="onlyHereToCheckIfStuffHasBeenAppended"
         >
           {(bo3s.length >1 && bo1s.length>1)?
-            <Card className="p-4 border rounded-lg bg-cumground mb-4 h-114">
-            <p className="text-[50px] font-bold -mt-5 text-white absolute">ALL:</p>
-            <div className="gap-4">
-                <div
-                  className="overflow-x-auto overflow-y-hidden overflow-x-hidden flex justify-center"
-                  style={{ height: 430 }}
-                >
-                  <div className="">
-                    <PieChartWithLegend
-                      data={PlayedData}
-                      title="Maps Played"
-                      type={"all"}
-                    />
-                  </div>
-                  <div className="">
-                    <PieChartWithLegend
-                      data={WinsData}
-                      title="Maps Won"
-                      type={"all"}
-                    />
-                  </div>
-                  <div className="">
-                    <PieChartWithLegend
-                      data={LossData}
-                      title="Maps Lost"
-                      type={"all"}
-                    />
+            <Card className="p-4 border rounded-lg bg-cumground mb-4 overflow-hidden">
+            <p className="text-[50px] font-bold -mt-5 text-white absolute">BO1+BO3:</p>
+            <div className="">
+                
+                
+                {/* Bar Chart Section - Separate from pie charts */}
+                <div className="w-full mb-4 overflow-hidden max-w-4xl mx-auto">
+                  <div className="p-4 bg-cumground rounded-lg overflow-hidden">
+                    <div className="w-full overflow-hidden">
+                      <MyBarCanvas data={transformMapsDataForBarChart(Played, W, L)} />
+                    </div>
                   </div>
                 </div>
               
@@ -977,163 +895,109 @@ function CreateStatsPage({
 
           {/*(bo1s should always be outputted)*/}
           {bo1s.length >=1 ?(
-                      <Card className="p-4 border rounded-lg bg-cumground mb-4 ">
+            <Card className="p-4 border rounded-lg bg-cumground mb-4 overflow-hidden">
             <p className="text-[50px] font-bold -mt-5 text-white absolute">BO1:</p>
-            <div className="flex-row ">
-              <div className="flex justify-center">
-                <div
-                  className="overflow-x-hidden overflow-y-hidden flex "
-                  style={{ width: 900, height: 430 }}
-                >
-                  <div className="">
-                    <PieChartWithLegend
-                      data={bo1PlayedData}
-                      title="Maps Played"
-                      type={"bo1"}
-                    />
+             <div className="flex-row overflow-hidden">
+               {/* BO1 Bar Chart and Picks Section */}
+               <div className="flex flex-wrap  mt-8">
+                 {/* Bar Chart Section */}
+                 <div className="flex-1 overflow-hidden">
+                   <div className="p-4 rounded-lg">
+                     <div className="bg-cumground rounded-lg -mx-4 mr-0">
+                       <MyBarCanvas data={transformMapsDataForBarChart(bo1Played, bo1Won, bo1Lost)} />
+                     </div>
+                   </div>
+                 </div>
+                 
+                 {/* Picks Pie Chart Section */}
+                 {bo1PickData.length > 0 && (
+                   <div className="flex -mt-8 bg-cumground rounded-lg mb-4">
+                     <PieChartWithLegend
+                       data={bo1PickData}
+                       title="Picks"
+                       type={"bo1"}
+                     />
+                   </div>
+                 )}
+               </div>
+              
+              {/* Icicle Graph Section for BO1 Bans */}
+              {bo1FirstBanData.length > 0 && (
+                <div className="w-full mb-4 max-w-10xl mx-auto">
+                  <div className="p-4 bg-cumground rounded-lg">
+                    <h3 className="text-center mb-4 font-bold text-white text-xl">Bans</h3>
+                    <div className="w-full h-full">
+                      <CreateIcicleGraph 
+                        bannedData={bo1Banned}
+                        firstBanData={bo1FirstBan}
+                        secondBanData={bo1SecondBan}
+                        thirdBanData={bo1ThirdBan}
+                        type={"bans"}
+                        
+                      />
+                    </div>
                   </div>
-                  {bo1WonData.length > 0 ? (
-                  <div className="">
-                    <PieChartWithLegend
-                      data={bo1WonData}
-                      title="Maps Won"
-                      type={"bo1"}
-                    />
-                  </div>
-                  ) : <div className="">
-                  <PieChartWithLegend
-                    data={bo1LostData}
-                    title="Maps Lost"
-                    type={"bo1"}
-                  />
-                </div>}
                 </div>
-                {bo1PickData.length > 0 ? (
-                <PieChartWithLegend
-                  data={bo1PickData}
-                  title="Picks"
-                  type={"bo1"}
-                />
-                ) : null}
-              </div>
-              <div className="flex justify-center">
-              <div
-                className="overflow-x-hidden overflow-y-hidden flex"
-                style={{ width: 1300, height: 430 }}
-              >
-                <div className="">
-                  <PieChartWithLegend
-                    data={bo1FirstBanData}
-                    title="First Ban"
-                    type={"bo1"}
-                  />
-                </div>
-                <div className="">
-                  <PieChartWithLegend
-                    data={bo1SecondBanData}
-                    title="Second Ban"
-                    type={"bo1"}
-                  />
-                </div>
+              )}
 
-                <div className="">
-                  <PieChartWithLegend
-                    data={bo1ThirdBanData}
-                    title="Third Ban"
-                    type={"bo1"}
-                  />
-                </div>
-              </div>
-              </div>
             </div>
           </Card>
           ):null}
           {bo3s.length >= 1 ? (
-            <Card className="p-4 border rounded-lg bg-cumground ">
+            <Card className="p-4 border rounded-lg bg-cumground overflow-hidden">
               <p className="text-[50px] -mt-5 font-bold text-gray-100 absolute">BO3:</p>
-              <div className="flex-row gap-4 ">
-                <div
-                  className="overflow-x-hidden overflow-y-hidden flex justify-center"
-                  style={{ height: 430 }}
-                >
-                  
-                  <div className="">
-                    <PieChartWithLegend
-                      data={bo3PlayedData}
-                      title="Maps Played"
-                      type={"bo3"}
-                    />
-                  </div>
-                  <div className="">
-                    <PieChartWithLegend
-                      data={bo3WonData}
-                      title="Maps Won"
-                      type={"bo3"}
-                    />
-                  </div>
-
-                  <div className="">
-                    <PieChartWithLegend
-                      data={bo3LostData}
-                      title="Maps Lost"
-                      type={"bo3"}
-                    />
-                  </div>
-                </div>
-                {/* First Pick/Ban Slot */}
-                {bo3FirstPickData.length > 0 && (
-                  <div
-                    className="overflow-x-auto overflow-y-hidden flex justify-center"
-                    style={{ height: 430 }}
-                  >
-                    <div className="flex" style={{ width: "max-content" }}>
-                      <div className="snap-start">
-                        <PieChartWithLegend
-                          data={bo3FirstPickData}
-                          title="First Pick"
-                          type={"bo3"}
-                        />
-                      </div>
-                      {bo3SecondPickData.length > 0 ? (
-                        <div className="snap-start">
-                          <PieChartWithLegend
-                            data={bo3SecondPickData}
-                            title="Second Pick"
-                            type={"bo3"}
-                          />
-                        </div>
-                      ) : null}
-                      {bo3ThirdPickData.length > 0 ? (
-                        <div className="snap-start">
-                          <PieChartWithLegend
-                            data={bo3ThirdPickData}
-                            title="Third Pick"
-                            type={"bo3"}
-                          />
-                        </div>
-                      ) : null}
+              <div className="flex-row gap-4 overflow-hidden">
+                {/* BO3 Bar Chart Section */}
+                <div className="w-full mx-auto -ml-5">
+                  <div className="flex p-4 mt-8 ">
+                    {/* Bar Chart Section */}
+                    <div className="flex-1 overflow-hidden">
+                   <div className="p-4 rounded-lg">
+                     <div className="bg-cumground rounded-lg -mx-4 mr-0">
+                       <MyBarCanvas data={transformMapsDataForBarChart(bo3Played, bo3Won, bo3Lost)} />
+                     </div>
+                   </div>
+                 </div>
+                    <div className="mt-12 bg-cumground rounded-lg w-64 h-48">
+                      <h4 className="text-white font-bold text-lg mb-2">Stats Summary (W.I.P)</h4>
+                      <p className="text-white text-sm">Blah blah BLAH </p>
+                      <p className="text-white text-sm">Mblah blabl blah BLAH </p>
+                      <p className="text-white text-sm">BLAH BLAH (BLAHHHH%)</p>
+                      <p className="text-white text-sm">blah blah: BLAH</p>
+                      <p className="text-white text-sm">blah:  b l a h</p>
                     </div>
                   </div>
-                )}
-                {/* Second Pick/Ban Slot */}
+                </div>
+
+              {/* Icicle Graph Section for BO3 Bans */}
+              {bo3FirstPickData.length > 0 && (
+                <div className="w-full mb-4 max-w-10xl mx-auto">
+                  <div className="p-4 bg-cumground rounded-lg">
+                    <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <a className="text-green">Picks</a></h3>
+                    <div className="w-full h-full">
+                      <CreateIcicleGraph 
+                        bannedData={BO3Picked}
+                        firstBanData={bo3FirstPick}
+                        secondBanData={bo3SecondPick}
+                        thirdBanData={[]}
+                        type={"picks"}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+                {/* Icicle Graph Section for BO3 Bans */}
                 {bo3FirstBanData.length > 0 && (
-                  <div
-                    className="overflow-x-auto overflow-y-hidden flex justify-center"
-                    style={{height: 430 }}
-                  >
-                    <div className="flex" style={{ width: "max-content" }}>
-                      <div className="snap-start">
-                        <PieChartWithLegend
-                          data={bo3FirstBanData}
-                          title="First Ban"
-                          type={"bo3"}
-                        />
-                      </div>
-                      <div className="snap-start">
-                        <PieChartWithLegend
-                          data={bo3SecondBanData}
-                          title="Second Ban"
-                          type={"bo3"}
+                  <div className="w-full mb-4 max-w-10xl mx-auto">
+                    <div className="p-4 bg-cumground rounded-lg overflow-hidden">
+                      <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <a className="text-red">Bans</a></h3>
+                      <div className="w-full ">
+                        <CreateIcicleGraph 
+                          bannedData={BO3Banned}
+                          firstBanData={bo3FirstBan}
+                          secondBanData={bo3SecondBan}
+                          thirdBanData={[]} // BO3 typically only has first and second bans
+                          type={"bans"}
                         />
                       </div>
                     </div>
@@ -1173,7 +1037,7 @@ function CreateStatsPage({
       return (
         <Card className="border rounded-lg bg-cumground flex h-154 justify-center mt-1">
           <p className="text-center text-lg text-gray-600">
-            We found nothing in those matches!
+            We found nothing in season !
           </p>
         </Card>
       );

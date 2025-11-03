@@ -45,19 +45,7 @@ export default function CalculateStats({
   }
 
   function calculateBO3score(stats: any) {
-    console.log("IM JUST IMPROVING ", stats);
-    let W = 0;
-    let L = 0;
-
-    for (const round of stats.matchData.rounds) {
-      if (round.round_stats.Winner == SelectedTeam) {
-        W++;
-      } else {
-        L++;
-      }
-    }
-
-    return +W + " / " + L;
+    return +stats.teamMatchData.results.score.faction1 + " / " + stats.teamMatchData.results.score.faction2;
   }
 
   return (
@@ -153,14 +141,14 @@ export default function CalculateStats({
                 }
               />
             </div>
-            <p className="text-[13px] w-15 text-black ml-1 mt-1.5 [text-shadow:0px_1px_2px_white] font-bold underline">
+            <p className="text-[13px] text-black ml-1 mt-1.5 [text-shadow:0px_1px_2px_white] font-bold underline">
               {stats.PicksAndBans["payload"].tickets[2].entities[6]
                 .selected_by == stats.teamMatchData.teams.faction1.faction_id
-                ? stats.teamMatchData.teams.faction1.name.length > 10
-                  ? `${stats.teamMatchData.teams.faction1.name.substring(0, 10)}...`
+                ? stats.teamMatchData.teams.faction1.name.length > 8
+                  ? `${stats.teamMatchData.teams.faction1.name.substring(0, 8)}...`
                   : `${stats.teamMatchData.teams.faction1.name}`
-                : stats.teamMatchData.teams.faction2.name.length > 10
-                  ? `${stats.teamMatchData.teams.faction2.name.substring(0, 10)}...`
+                : stats.teamMatchData.teams.faction2.name.length > 8
+                  ? `${stats.teamMatchData.teams.faction2.name.substring(0, 8)}...`
                   : `${stats.teamMatchData.teams.faction2.name}`}{" "}
             </p>
           </div>

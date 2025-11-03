@@ -1,5 +1,4 @@
 import { getFaceitHeaders } from "../config/api-keys";
-import fetchUpcomingMatches from "./FetchUpcomingMatches";
 
 export default async function fetchTeamProfile(teamId) {
   try {
@@ -18,7 +17,6 @@ export default async function fetchTeamProfile(teamId) {
     }
     const teamData = await resTeam.json();
 
-
     const resTeamStats = await fetch(`https://open.faceit.com/data/v4/teams/${teamId}/stats/cs2`, {
       headers,
     });
@@ -34,22 +32,39 @@ export default async function fetchTeamProfile(teamId) {
     if (!resLeagues.ok) throw new Error("Failed to fetch team leagues");
     let leagueData = await resLeagues.json();
     leagueData = leagueData.payload;
-
-    let upcomingdata = [];
-    for (const seasonstandings of leagueData[0].league_seasons_info[0].season_standings){
-        const UpcomingMatches = await fetchUpcomingMatches(teamId,seasonstandings.championship_id);
-        if(!UpcomingMatches.ok) throw new Error("Failed to fetch upcoming matches");
-        let fart = await UpcomingMatches.json();
-        upcomingdata.push(fart.payload);
+    
+    
+    for(const season of leagueData[0].league_seasons_info){
+      let organizedLeagueSeasonInfo = [];
+      let DivisionCheck = season.season_standings[0].division_name;
+      let DivisionArray = [];
+      for(const Division of season.season_standings){
+        if(Division.division_name == DivisionCheck){
+          DivisionArray.push(Division);
+        }
+        else{
+          DivisionCheck = Division.division_name;
+          organizedLeagueSeasonInfo.push(DivisionArray);
+          DivisionArray = [];
+          DivisionArray.push(Division);
+        }
+      };
+      // Push the last group after the loop
+      if (DivisionArray.length > 0) {
+        organizedLeagueSeasonInfo.push(DivisionArray);
+      }
+      console.log("🏆 Organized League Season Info:", organizedLeagueSeasonInfo);
+      
+      // Replace the original season standings with the organized groups
+      season.season_standings = organizedLeagueSeasonInfo;
     }
     
-  
+    
 
     let finalreturn = {
       teamdata: teamData,
       teamstats: teamDataStats,
       leagues: leagueData,
-      UpcomingMatches: upcomingdata,
     }
 
     return finalreturn;
