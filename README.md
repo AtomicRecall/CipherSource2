@@ -1,166 +1,140 @@
-# WARP.md
+# Cipher Source 2 (CS2)
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+Cipher Source 2 is a web application for viewing Counter-Strike 2 (CS2) team profiles, statistics, and match information using the FACEIT API. It allows users to search for teams by name, FACEIT URL, or team ID, and provides detailed insights into team performance, rosters, and league standings.
 
-## Project Overview
+## Technologies Used
 
-CipherSource2 is a CS2 (Counter-Strike 2) ESEA statistics and team analysis application built with Next.js 15. The app displays detailed team profiles, match statistics, league standings, and interactive charts for Counter-Strike teams competing in ESEA leagues.
+- **Next.js 15** - React framework for server-side rendering and routing
+- **HeroUI v2** - UI component library for React
+- **Tailwind CSS** - Utility-first CSS framework
+- **TypeScript** - Typed JavaScript for better development experience
+- **Framer Motion** - Animation library for React
+- **Nivo** - Data visualization library (@nivo/bar, @nivo/core, @nivo/icicle, @nivo/pie)
+- **ApexCharts** - Chart library for interactive visualizations
+- **AG Grid** - Data grid component for tables
+- **React Country Flag** - Component for displaying country flags
+- **FACEIT API** - External API for CS2 team and match data
 
-**Key Features:**
-- Team profile analysis with FACEIT API integration
-- Interactive match statistics with pie charts (using Nivo)
-- Season-based filtering for different ESEA leagues
-- Real-time data fetching for team standings and match history
-- Custom theming with HeroUI components
+## How to Use
 
-## Development Commands
+### Install Dependencies
 
-### Core Development
 ```bash
-# Start development server with Turbopack
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint and auto-fix code issues
-npm run lint
-```
-
-### Package Management
-```bash
-# Install dependencies
 npm install
-
-# For pnpm users (add to .npmrc if using pnpm)
-echo "public-hoist-pattern[]=*@heroui/*" >> .npmrc
 ```
 
-## Architecture & Code Structure
+### Run the Development Server
 
-### Core Application Flow
-1. **Entry Point**: `app/page.tsx` - Main landing page with team profile interface
-2. **Profile Loading**: `components/FuckWithProfile.tsx` - Main orchestrator component that:
-   - Fetches team data via `FetchProfile.js`
-   - Manages season selection and UI state
-   - Coordinates match data retrieval
-3. **Data Pipeline**: External API calls → `GetAllThatFuckingShit.js` → Statistics processing
-4. **Visualization**: `components/CreateStatsPage.tsx` - Complex statistics rendering with multiple chart types
-
-### Key Data Flow Pattern
-```
-URL Params → FuckWithProfile → FetchProfile (FACEIT API) → Season Selection → 
-GetAllThatFuckingShit (Match Data) → CreateStatsPage (Charts & Analytics)
+```bash
+npm run dev
 ```
 
-### Critical Components
+The application will be available at `http://localhost:3000`.
 
-**`FuckWithProfile.tsx`** - Main container component
-- Handles all application state management
-- Manages dynamic season/league selection
-- Coordinates between data fetching and visualization
-- Contains complex SessionStorage logic for UI state persistence
+### Build for Production
 
-**`CreateStatsPage.tsx`** - Statistics engine
-- Processes raw match data into categorized statistics
-- Handles BO1/BO3/BO5 match type differentiation
-- Generates pie chart data with win rates, ban patterns, map preferences
-- Contains extensive global arrays for statistical calculations
+```bash
+npm run build
+npm start
+```
 
-**Data Fetching Layer** (JavaScript files in `/components/`)
-- `FetchProfile.js` - Primary team data fetching with FACEIT API
-- `GetAllThatFuckingShit.js` - Match history and statistics aggregation
-- `FetchGameStats.js`, `FetchUpcomingMatches.js` - Specialized data fetchers
+## Application Logic
 
-### API Integration
-- **FACEIT API**: Team profiles, player data, team statistics
-- **Custom Proxy**: `cipher-virid.vercel.app/api/TeamLeagueProxy` for league data
-- **Authentication**: Uses hardcoded API key (consider environment variables for production)
+Cipher Source 2 consists of two main parts:
 
-### State Management Patterns
-- Heavy use of `useState` and `useEffect` hooks
-- SessionStorage for UI state persistence across interactions
-- Complex array manipulation for statistical calculations
-- Real-time data processing and chart generation
+1. **Search Interface** (`public/home.html`) - A static HTML page that allows users to search for CS2 teams
+2. **Team Profile Viewer** - A Next.js application that displays detailed team information
 
-### Styling & UI Framework
-- **HeroUI v2**: Primary component library with custom theme configuration
-- **Tailwind CSS**: Utility-first styling with custom color palette
-- **Custom Theme**: Orange/dark theme (`#FF6900`) with transparency effects
-- **Responsive Design**: Mobile-first approach with breakpoint utilities
+### Search Flow
 
-### TypeScript Configuration
-- Path aliases: `@/*` maps to project root
-- Strict mode enabled with comprehensive type checking
-- Next.js plugin integration for enhanced development experience
+- Users enter a team name, FACEIT team URL, team ID, or match ID in the search box
+- The application queries the FACEIT API to find matching teams
+- If a match ID is provided, it extracts the participating team IDs from the match data
+- Upon successful search, users are redirected to the team profile page
 
-## Development Guidelines
+### Team Profile Display
 
-### Code Organization
-- Components use descriptive (sometimes unconventional) naming
-- Heavy use of inline functions and complex data transformations
-- Extensive console logging for debugging (consider removing in production)
-- Mixed JavaScript/TypeScript usage (`.js` files for data fetching, `.tsx` for components)
+- Team pages are dynamically generated using Next.js routing (`/[team_id]`)
+- Each page fetches comprehensive team data from multiple sources:
+  - Team basic info and roster from FACEIT API
+  - Team statistics from FACEIT API
+  - League standings from a custom proxy API
 
-### Data Processing Patterns
-- Statistics calculations happen in real-time during component rendering
-- Global arrays are reset on each render to ensure fresh calculations
-- Complex nested data structures from FACEIT API require careful handling
+## File Structure and Functionality
 
-### Performance Considerations
-- Large datasets processed client-side
-- Multiple API calls coordinated sequentially
-- Consider memoization for expensive calculations
-- React.memo used for CreateStatsPage component
+### Root Level Configuration
+- `package.json` - Project dependencies and scripts
+- `next.config.js` - Next.js configuration
+- `tailwind.config.js` - Tailwind CSS configuration
+- `postcss.config.js` - PostCSS configuration
+- `eslint.config.mjs` - ESLint configuration
+- `tsconfig.json` - TypeScript configuration
+- `next-env.d.ts` - Next.js TypeScript declarations
 
-### API Key Management
-- Currently uses hardcoded API key in `FetchProfile.js`
-- **Important**: Move to environment variables before deployment
+### App Directory (`app/`)
+- `page.tsx` - Main page that redirects to `/home`
+- `layout.tsx` - Root layout component
+- `error.tsx` - Error boundary component
+- `providers.tsx` - Context providers
+- `[team_id]/page.tsx` - Dynamic route for team profile pages
 
-## Working with This Codebase
+### Components (`components/`)
+- `CreateTeamProfile.tsx` - Main component for rendering team profiles, handles data fetching and layout
+- `CreateStatsPage.tsx` - Displays team statistics with charts and graphs
+- `CreateMatchNavbar.tsx` - Navigation component for match-related pages
+- `CreateBarGraph.tsx`, `CreateIcicleGraph.tsx` - Chart components using Nivo
+- `CreateTable.tsx` - Data table component using AG Grid
+- `FetchProfile.js` - API client for fetching team profile data
+- `FetchGameStats.js` - API client for fetching game statistics
+- `FetchLatestUsername.js` - API client for fetching player username updates
+- `FetchUpcomingMatches.js` - API client for fetching upcoming matches
+- `FetchVetoInformation.js` - API client for fetching veto information
+- `Flag.tsx` - Component for displaying country flags
+- `ProfileCard.tsx` - Component for player profile cards
+- Various skeleton components for loading states
 
-### Adding New Statistics
-1. Extend global arrays in `CreateStatsPage.tsx`
-2. Add data processing logic in the main statistics loop
-3. Create new `PieChartWithLegend` instances for visualization
-4. Update the reset function to include new arrays
+### Configuration (`config/`)
+- `api-keys.ts` - FACEIT API key configuration
+- `fonts.ts` - Font configuration
+- `site.ts` - Site-wide configuration
 
-### Modifying Data Sources
-- Primary data fetching occurs in `components/*.js` files
-- FACEIT API responses follow consistent patterns
-- Proxy endpoints may require updates for new data types
+### Public Assets (`public/`)
+- `home.html` - Static search interface
+- `search.html` - Alternative search page
+- `images/` - Static images (team logos, season logos, etc.)
+- `src/` - Client-side JavaScript for the static pages
+  - `searchLogic.js` - Search functionality and FACEIT API integration
+  - `api-config.js` - API configuration
+  - `front-end-styling.css` - Styles for static pages
+  - `version-config.js` - Version information
 
-### UI/UX Changes
-- HeroUI components provide consistent styling
-- Custom Tailwind classes handle theme-specific styling
-- Responsive breakpoints already configured in most components
+### Styles (`styles/`)
+- `globals.css` - Global CSS styles
 
-### Debugging Tips
-- Extensive console.log statements throughout the codebase
-- React Developer Tools essential for state inspection
-- Network tab crucial for API call debugging
-- SessionStorage inspection for UI state issues
+### Types (`types/`)
+- `index.ts` - TypeScript type definitions
 
-## Build Troubleshooting
+## Data Flow and Communication
 
-### Common Build Issues
+### API Communication
+- **FACEIT API**: Primary data source for team info, stats, matches, and player data
+- **Custom Proxy API** (`cipher-virid.vercel.app`): Provides league standings data
+- All API calls use Bearer token authentication with the FACEIT API key
 
-1. **ESLint/TypeScript Errors**: Build is configured to ignore lint and type errors during production builds (see `next.config.js`)
+### Component Communication
+- Data flows from API fetch functions to React components via props and state
+- Parent components (like `CreateTeamProfile`) manage state and pass data to child components
+- Components use React hooks (`useState`, `useEffect`) for state management
+- Some components directly manipulate the DOM for dynamic content (e.g., roster rendering)
 
-2. **useSearchParams Suspense Error**: Fixed by wrapping components using `useSearchParams()` in `<Suspense>` boundary
+### Routing
+- Static search page redirects to dynamic Next.js routes
+- Next.js handles client-side navigation between team pages
+- URL parameters (team_id) determine which team's data to display
 
-3. **Console Statement Warnings**: Console statements are disabled during linting in development but will error in production
+## Development Notes
 
-4. **Missing Key Props**: React components in iterators require unique `key` props
-
-### Build Configuration
-- `next.config.js` configured to ignore build errors for development workflow
-- ESLint configured to allow console statements in development
-- TypeScript strict mode enabled but build errors ignored
-- Suspense boundaries required for client-side search params
-
-### Build Success
-After fixing critical syntax errors and Suspense boundary issues, the build compiles successfully with static page generation.
+- The application uses both static HTML pages and Next.js for different functionalities
+- API keys are currently hardcoded (not recommended for production)
+- Some components use direct DOM manipulation alongside React's virtual DOM
+- The app focuses on CS2 esports data visualization and team analysis
