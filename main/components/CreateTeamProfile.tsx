@@ -200,7 +200,8 @@ export default function CreateTeamProfile() {
   const pathname = usePathname();
   const router = useRouter();
   const user = params.team_id as string;
-
+  const isMatchId = /^\d+-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(user);
+  (isMatchId)?window.location.href="/search/"+user:null;
   console.log("🔍 FuckWithProfile rendered with user:", user, "pathname:", pathname);
 
   // Early return if no user (team_id) or if we're not on a team route - prevents any rendering or API calls
