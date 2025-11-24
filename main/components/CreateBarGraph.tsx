@@ -1,6 +1,29 @@
 import { ResponsiveBar } from '@nivo/bar'
 
-
+function whatColor(mapname: string): string {
+  switch (mapname) {
+    case "de_dust2":
+      return "#FFF2BA";
+    case "de_ancient":
+      return "#00FF00";
+    case "de_nuke":
+      return "#00C8FF";
+    case "de_anubis":
+      return "#FF6666";
+    case "de_inferno":
+      return "#FFCD00";
+    case "de_vertigo":
+      return "#0000FF";
+    case "de_mirage":
+      return "#994C00";
+    case "de_train":
+      return "#331900";
+    case "de_overpass":
+      return "#660066";
+    default:
+      return "#ffffffff";
+  }
+}
 export const MyBarCanvas = ({ data }: { data: any }) => {
   console.log("MyBarCanvas received data:", data);
   
@@ -8,11 +31,17 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
     return <div className="text-white text-center">No data available!</div>;
   }
 
-  // Process data to remove de_ prefix from map names
-  const processedData = data.map((item: any) => ({
-    ...item,
-    country: item.country?.replace(/^de_/, '').substring(0,1).toLocaleUpperCase()+item.country?.replace(/^de_/, '').substring(1) || item.country
-  }));
+  // Process data to remove de_ prefix from map names and add total
+  const processedData = data.map((item: any) => {
+    const processedName = item.country?.replace(/^de_/, '').substring(0,1).toUpperCase()+item.country?.replace(/^de_/, '').substring(1) || item.country;
+    const total = (Number(item.wins) || 0) + (Number(item.losses) || 0);
+    return {
+      ...item,
+      country: `${processedName} (${total})`,
+      originalMap: item.country,
+      total: total
+    };
+  });
   
   // Compute max total (wins + losses or provided totalPlayed) to drive dynamic grid/ticks
   const getTotal = (item: any) => {
@@ -47,7 +76,7 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
   let maxCount = 0;
   let minCount = Infinity;
   for(const item of processedData){
-    const total = item.wins + item.losses;
+    const total = item.total;
     if(total > maxCount){
       maxCount = total;
       mostPlayed = [item];
@@ -61,8 +90,6 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
       leastPlayed.push(item);
     }
   }
-  let mostNames = mostPlayed.map((item: any) => item.country).join(', ');
-  let leastNames = leastPlayed.map((item: any) => item.country).join(', ');
   // Use full width of container
   const widthPercentage = '100%';
 
@@ -186,19 +213,23 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
         />
         
       </div>
-      <h3 className="text-center mb-1 font-bold text-white text-xl">MOST PLAYED: <a>{mostNames}</a> | LEAST PLAYED: <a>{leastNames}</a></h3>
-      </div>
-      {/* External Legend */}
-      <div className="flex flex-col justify-center mx-5">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span className="text-white text-xl font-large">Wins</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-500 rounded "></div>
-          <span className="text-white text-xl font-large">Losses</span>
-        </div>
+      <h3 className="text-center mb-1 font-bold text-white text-xl">
+        MOST PLAYED: {mostPlayed.map((item: any, index: number) => (
+            <span key={item.originalMap} style={{ color: whatColor(item.originalMap) }}>
+            {item.country.split(' (')[0]}{index < mostPlayed.length - 1 ? '' : ''}
+            <span className={"text-white"}>{index < mostPlayed.length - 1 ? ', ' : <span> ({item.total} Time{item.total > 1 ? 's':''})</span>}</span>
+            
+          </span>
+        ))} | LEAST PLAYED: {leastPlayed.map((item: any, index: number) => (
+          <span key={item.originalMap} style={{ color: whatColor(item.originalMap) }}>
+            {item.country.split(' (')[0]}{index < leastPlayed.length - 1 ? '' : ''}
+            
+            <span className={"text-white"}>{index < leastPlayed.length - 1 ? ', ' : <span> ({item.total} Time{item.total > 1 ? 's':''})</span>}</span>
+
+          </span>
+        ))}
         
+      </h3>
       </div>
       
     </div>

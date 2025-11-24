@@ -23,6 +23,7 @@ function fadeInViaTransition(el, duration = 500) {
 
 // Team ID pattern and helper to extract a Faceit team ID from a URL or raw input
 const teamIdPattern = /^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/;
+const matchIdRegex = /1-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
 function extractFaceitTeamId(input) {
     if (!input || typeof input !== 'string') return null;
     const trimmed = input.trim();
@@ -30,9 +31,22 @@ function extractFaceitTeamId(input) {
     if (teamIdPattern.test(trimmed)) return trimmed;
     // Otherwise try to find a UUID-like token inside the string (e.g. inside a URL)
     const found = trimmed.match(/[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}/);
+    
+    
     return found ? found[0] : null;
 }
 
+function extractFaceitMatchId(input){
+    if (!input || typeof input !== 'string') return null;
+    const trimmed = input.trim();
+    const ismatchID = trimmed.match(matchIdRegex);
+    return ismatchID ? ismatchID[0] : null;
+}
+
+function enableSearchInput(){
+    try { document.getElementById("searchText").disabled = false; } catch(e){}
+    
+}
 // Keep ClickSearch as an async function attached to window for global access
 window.ClickSearch = async function ClickSearch(input){
 
@@ -52,22 +66,63 @@ window.ClickSearch = async function ClickSearch(input){
     let teamsFound;
     // allow passing either a full Faceit URL or the raw team id
     const extractedId = extractFaceitTeamId(input);
+    const ismatchID = extractFaceitMatchId(input);
+    console.log("Input is what?? ",input);
+    if(ismatchID){
+            await fetch(`https://open.faceit.com/data/v4/matches/${input}`,{
+                headers: getFaceitHeaders()
+            })
+            .then(response => {
+                if (!response.ok) {
+                    enableSearchInput();
+                    throw new Error(`HTTP v4 matches error! status: ${response.status}`);
+                    
+                }
+                return response.json();
+                
+            })
+            .then(data =>{
+                console.log("GOT THE MATCH DATA",data);
+                teamsFound = [{ team_id: data.teams.faction1.faction_id }, { team_id: data.teams.faction2.faction_id }];
+                console.log("TEAM IN MATCH DATA",data.teams.faction1);
+                console.log("TEAM IN MATCH DATA",data.teams.faction2);
+            })
+            .catch(error =>{
+                console.error('Error fetching data:', error);
+            });
+        }
     if (!extractedId) {
+        
         
         await fetch(`https://open.faceit.com/data/v4/search/teams?nickname=${encodeURIComponent(input)}&game=cs2`,{
             headers: getFaceitHeaders()
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                enableSearchInput();
+                throw new Error(`HTTP v4 team search error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data =>{
             if(data.items.length < 1){
-                alert("Was not able to retrieve teams from your input!");
-                try { document.getElementById("searchText").disabled = false; } catch(e){}
-                try { document.getElementById("searchText").value = ""; } catch(e){}
+                // Custom red alert popup
+                let alertDiv = document.createElement('div');
+                alertDiv.style.position = 'fixed';
+                alertDiv.style.top = '50%';
+                alertDiv.style.left = '50%';
+                alertDiv.style.transform = 'translate(-50%, -50%)';
+                alertDiv.style.backgroundColor = '#ff00001f';
+                alertDiv.style.color = 'white';
+                alertDiv.style.padding = '20px';
+                alertDiv.style.borderRadius = '10px';
+                alertDiv.style.zIndex = '1000';
+                alertDiv.style.fontSize = '16px';
+                alertDiv.style.textAlign = 'center';
+                alertDiv.innerHTML = 'No teams were found in your input! <br><br><button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; background: white; color: black; border: none; border-radius: 5px; cursor: pointer;">OK</button>';
+                document.body.appendChild(alertDiv);
+                enableSearchInput();
+                  
                 return;
             }
             teamsFound = data.items;
@@ -77,18 +132,27 @@ window.ClickSearch = async function ClickSearch(input){
         });
     } else {
         // Use the extracted id directly
-        document.getElementById("searchText").value = extractedId;
-        teamsFound = [{ team_id: extractedId }];
+        if(ismatchID){
+            document.getElementById("searchText").value = input;
+            
+        }
+        else{
+            document.getElementById("searchText").value = extractedId;
+            teamsFound = [{ team_id: extractedId }];
+        }
+        
     }
 
     for(const team of teamsFound){
-
+        console.log("FETCHING TEAM DATA FOR TEAM:",team);
         fetch(`https://open.faceit.com/data/v4/teams/${team.team_id}`,{
             headers: getFaceitHeaders()
         })
         .then(response => {
             if (!response.ok) {
+                enableSearchInput();
                 throw new Error(`HTTP error! status: ${response.status}`);
+                
             }
             return response.json();
         })
@@ -101,7 +165,7 @@ window.ClickSearch = async function ClickSearch(input){
             encompassingDivider.style.backgroundColor = "#0000005e";
                 let name = document.createElement("div");
                 name.id = "name";
-                name.innerHTML = data.name+"<a>("+data.nickname+")</a>";
+                name.innerHTML = data.name+"<span>("+data.nickname+")</span>";
                 name.style.color = "white";
                 encompassingDivider.appendChild(name);
 

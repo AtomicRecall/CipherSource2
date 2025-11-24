@@ -4,13 +4,13 @@ import { siteConfig } from "../config/site";
 
 export default function StatsSkeleton() {
   return (
-    <div className="w-screen -mx-3 px-4">
+    <div className=" -mx-3 px-4">
       <div className="flex flex-col w-full font-play">
-        <Card className={`py-4 mt-1`} radius="lg">
-          <div className={`flex w-10 h-146`}>
+        <Card className={`py-4 w-392 mt-1`} radius="lg">
+          <div className={`flex  h-146`}>
             <div>
-              <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />
-              <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />
+              <Skeleton className="flex mb-3 h-114 w-full ml-2 w-385 rounded-medium" />
+              <Skeleton className="flex mb-3 h-114 w-full ml-2 w-385 rounded-medium" />
             </div>
           </div>
         </Card>

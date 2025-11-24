@@ -1,8 +1,10 @@
 import { Card, colors, Skeleton } from "@heroui/react";
 import { ResponsivePie, PieSvgProps } from "@nivo/pie";
+import StatsSkeleton from "@/components/StatsSkeleton";
 import React from "react";
 import { siteConfig } from "../config/site";
 import { MyBarCanvas } from "./CreateBarGraph";
+import  CreateTable from "./CreateTable";
 import CreateIcicleGraph from "./CreateIcicleGraph";
 
 
@@ -132,6 +134,8 @@ export function resetGlobalArrays() {
   bo3SecondBan = [];
   bo1Banned = [];
   bo1FirstBan = [];
+  bo1FirstBanTeamA = [];
+  bo1FirstBanTeamB = [];
   bo1SecondBan = [];
   bo1ThirdBan = [];
   bo1Pick = [];
@@ -170,6 +174,7 @@ function whatColor(mapname: string): string {
 interface MapStats {
   map_name: string;
   count: number;
+  wholePickBanData?: any; 
 }
 
 // Arrays to store stats
@@ -190,6 +195,8 @@ let bo3SecondBan: MapStats[] = [];
 let BO3Banned: MapStats[] = [];
 let bo1Banned: MapStats[] = [];
 let bo1FirstBan: MapStats[] = [];
+let bo1FirstBanTeamA: MapStats[] = [];
+let bo1FirstBanTeamB: MapStats[] = [];
 let bo1SecondBan: MapStats[] = [];
 let bo1ThirdBan: MapStats[] = [];
 let bo1Pick: MapStats[] = [];
@@ -224,6 +231,8 @@ function CreateStatsPage({
   bo3SecondBan = [];
   bo1Banned = [];
   bo1FirstBan = [];
+  bo1FirstBanTeamA = [];
+  bo1FirstBanTeamB = [];
   bo1SecondBan = [];
   bo1ThirdBan = [];
   bo1Pick = [];
@@ -235,6 +244,7 @@ function CreateStatsPage({
   bo3Lost=[];
 
   console.log("NO FUCKING WAY ", stats);
+  const bo1ResetZoomRef = React.useRef<(() => void) | null>(null);
   
   /* Each of these arrays will have an object like this pushed to them:
       {"map_name" : "number"}
@@ -333,13 +343,15 @@ function CreateStatsPage({
     for (const eachBo1 of bo1s) {
       let numBan = 0;
       let numPick = 0;
+      let numBanThisGame = 0;
+      for (const eachPickOrBan of eachBo1.PicksAndBans.payload.tickets[2].entities) {
 
-      for (const eachPickOrBan of eachBo1.PicksAndBans.payload.tickets[2]
-        .entities) {
+        numBanThisGame++;
         if (
           eachPickOrBan.selected_by == SelectedTeam &&
           eachPickOrBan.status == "drop"
         ) {
+          
           numBan++;
           // Always update Banned
           const mapObj1 = Banned.find(
@@ -362,6 +374,28 @@ function CreateStatsPage({
           }
           switch (numBan) {
             case 1:
+              if(numBanThisGame == 1){
+                const mapObj1 = bo1FirstBanTeamA.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
+
+                if (mapObj1) {
+                  mapObj1.count += 1;
+                } else {
+                  bo1FirstBanTeamA.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+              }
+              else if(numBanThisGame == 2){
+                const mapObj1 = bo1FirstBanTeamB.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
+
+                if (mapObj1) {
+                  mapObj1.count += 1;
+                } else {
+                  bo1FirstBanTeamB.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+              }
               const mapObj1 = FirstBan.find(
                 (obj) => obj.map_name == eachPickOrBan.guid,
               );
@@ -389,8 +423,9 @@ function CreateStatsPage({
 
               if (secondObject) {
                 secondObject.count += 1;
+                secondObject.wholePickBanData?.push(eachBo1.PicksAndBans.payload.tickets[2].entities);
               } else {
-                bo1SecondBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+                bo1SecondBan.push({ map_name: eachPickOrBan.guid, count: 1, wholePickBanData: [eachBo1.PicksAndBans.payload.tickets[2].entities] });
               }
               const mapObj2 = SecondBan.find(
                 (obj) => obj.map_name == eachPickOrBan.guid,
@@ -398,8 +433,9 @@ function CreateStatsPage({
 
               if (mapObj2) {
                 mapObj2.count += 1;
+                mapObj2.wholePickBanData?.push(eachBo1.PicksAndBans.payload.tickets[2].entities);
               } else {
-                SecondBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+                SecondBan.push({ map_name: eachPickOrBan.guid, count: 1, wholePickBanData: [eachBo1.PicksAndBans.payload.tickets[2].entities] });
               }
 
               break;
@@ -410,8 +446,9 @@ function CreateStatsPage({
 
               if (thirdObject) {
                 thirdObject.count += 1;
+                thirdObject.wholePickBanData?.push(eachBo1.PicksAndBans.payload.tickets[2].entities);
               } else {
-                bo1ThirdBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+                bo1ThirdBan.push({ map_name: eachPickOrBan.guid, count: 1, wholePickBanData: [eachBo1.PicksAndBans.payload.tickets[2].entities] });
               }
               const mapObj3 = ThirdBan.find(
                 (obj) => obj.map_name == eachPickOrBan.guid,
@@ -419,8 +456,9 @@ function CreateStatsPage({
 
               if (mapObj3) {
                 mapObj3.count += 1;
+                mapObj3.wholePickBanData?.push(eachBo1.PicksAndBans.payload.tickets[2].entities);
               } else {
-                ThirdBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+                ThirdBan.push({ map_name: eachPickOrBan.guid, count: 1, wholePickBanData: [eachBo1.PicksAndBans.payload.tickets[2].entities] });
               }
               break;
             default:
@@ -487,9 +525,13 @@ function CreateStatsPage({
     const PlayedData = [];
     const PickData = [];
     const FirstBanData = [];
+    const FirstBanTeamAData = [];
+    const FirstBanTeamBData = [];
     const SecondBanData = [];
     const ThirdBanData = [];
     const bo1FirstBanData = [];
+    const bo1FirstBanTeamAData = [];
+    const bo1FirstBanTeamBData = [];
     const bo1SecondBanData = [];
     const bo1ThirdBanData = [];
     const bo1PickData = [];
@@ -685,6 +727,8 @@ function CreateStatsPage({
           }
         }
       }
+      
+      
       for (const map of bo3FirstPick) {
         bo3FirstPickData.push({
           id: `${map.map_name}`,
@@ -710,6 +754,24 @@ function CreateStatsPage({
         });
       }
     }
+    for (const map of bo1FirstBanTeamA) {
+        bo1FirstBanTeamAData.push({
+          id: `${map.map_name}`,
+          label: `${map.map_name}`,
+          value: `${map.count}`,
+          color: whatColor(map.map_name),
+        });
+      }
+      for (const map of bo1FirstBanTeamB) {
+        bo1FirstBanTeamBData.push({
+          id: `${map.map_name}`,
+          label: `${map.map_name}`,
+          value: `${map.count}`,
+          color: whatColor(map.map_name),
+        });
+      }
+      console.log("BO1 FIRST BAN TEAM A DATA ", bo1FirstBanTeamAData);
+      console.log("BO1 FIRST BAN TEAM B DATA ", bo1FirstBanTeamBData);
     for (const map of W) {
       WinsData.push({
         id: `${map.map_name}`,
@@ -784,6 +846,7 @@ function CreateStatsPage({
         color: whatColor(map.map_name),
       });
     }
+    console.log("Did it work? ",bo1SecondBan, bo1ThirdBan)
     for (const map of bo1ThirdBan) {
       bo1ThirdBanData.push({
         id: `${map.map_name}`,
@@ -874,22 +937,28 @@ function CreateStatsPage({
           className="overflow-hidden w-full"
           id="onlyHereToCheckIfStuffHasBeenAppended"
         >
-          {(bo3s.length >1 && bo1s.length>1)?
+          {(bo3s.length >=1 && bo1s.length>=1)?
             <Card className="p-4 border rounded-lg bg-cumground mb-4 overflow-hidden">
             <p className="text-[50px] font-bold -mt-5 text-white absolute">BO1+BO3:</p>
-            <div className="">
-                
-                
-                {/* Bar Chart Section - Separate from pie charts */}
-                <div className="w-full mb-4 overflow-hidden max-w-4xl mx-auto">
-                  <div className="p-4 bg-cumground rounded-lg overflow-hidden">
-                    <div className="w-full overflow-hidden">
-                      <MyBarCanvas data={transformMapsDataForBarChart(Played, W, L)} />
-                    </div>
-                  </div>
+            {/* BO1 Bar Chart and Picks Section */}
+               <div className="flex flex-wrap  mt-8">
+                 {/* Bar Chart Section */}
+                 <div className="flex-1 overflow-hidden">
+                   <div className="p-4 rounded-lg">
+                     <div className="bg-cumground rounded-lg -mx-4 mr-0">
+                       <MyBarCanvas data={transformMapsDataForBarChart(Played, W, L)} />
+                     </div>
+                   </div>
+                 </div>
+                 
+                {/* Most Import Info Section */}
+                <div className="flex-col -mt-8 bg-cumground rounded-lg mb-4" style={{width: '870px'}}>
+                    <h4 className="text-white font-bold text-lg text-center mt-2">Stats Summary (W.I.P) (PLEASE IGNORE)</h4>
+                    <CreateTable />
                 </div>
-              
-            </div>
+               </div>
+            
+            
             
           </Card>:null}
 
@@ -909,33 +978,51 @@ function CreateStatsPage({
                    </div>
                  </div>
                  
-                 {/* Picks Pie Chart Section */}
-                 {bo1PickData.length > 0 && (
-                   <div className="flex -mt-8 bg-cumground rounded-lg mb-4">
-                     <PieChartWithLegend
-                       data={bo1PickData}
-                       title="Picks"
-                       type={"bo1"}
-                     />
-                   </div>
-                 )}
+                {/* Most Import Info Section */}
+                <div className="flex-col -mt-8 bg-cumground rounded-lg mb-4" style={{width: '870px'}}>
+                    <h4 className="text-white font-bold text-lg text-center mt-2">Stats Summary (W.I.P) (PLEASE IGNORE)</h4>
+                    <CreateTable />
+                </div>
                </div>
               
               {/* Icicle Graph Section for BO1 Bans */}
               {bo1FirstBanData.length > 0 && (
                 <div className="w-full mb-4 max-w-10xl mx-auto">
                   <div className="p-4 bg-cumground rounded-lg">
-                    <h3 className="text-center mb-4 font-bold text-white text-xl">Bans</h3>
-                    <div className="w-full h-full">
-                      <CreateIcicleGraph 
-                        bannedData={bo1Banned}
-                        firstBanData={bo1FirstBan}
-                        secondBanData={bo1SecondBan}
-                        thirdBanData={bo1ThirdBan}
-                        type={"bans"}
-                        
-                      />
-                    </div>
+                        <div style={{ position: 'relative', marginBottom: 8 }}>
+                          <button
+                            onClick={() => bo1ResetZoomRef.current && bo1ResetZoomRef.current()}
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              background: 'rgba(0,0,0,0.6)',
+                              color: '#fff',
+                              border: '1px solid rgba(255,255,255,0.06)',
+                              padding: '6px 8px',
+                              borderRadius: 6,
+                              cursor: 'pointer',
+                              fontSize: 12,
+                            }}
+                          >
+                            Reset Zoom
+                          </button>
+                          <h3 className="font-bold text-white text-xl" style={{ textAlign: 'center', margin: 0 }}>Bans</h3>
+                        </div>
+                        <div className=" h-full">
+                          <CreateIcicleGraph 
+                            bannedData={bo1Banned}
+                            firstBanData={bo1FirstBan}
+                            secondBanData={bo1SecondBan}
+                            thirdBanData={bo1ThirdBan}
+                            bo1FirstBanTeamAData={bo1FirstBanTeamA}
+                            bo1FirstBanTeamBData={bo1FirstBanTeamB}
+                            resetZoomRef={bo1ResetZoomRef}
+                            type={"bans"}
+                            season={55}
+                          />
+                        </div>
                   </div>
                 </div>
               )}
@@ -958,14 +1045,11 @@ function CreateStatsPage({
                      </div>
                    </div>
                  </div>
-                    <div className="mt-12 bg-cumground rounded-lg w-64 h-48">
-                      <h4 className="text-white font-bold text-lg mb-2">Stats Summary (W.I.P)</h4>
-                      <p className="text-white text-sm">Blah blah BLAH </p>
-                      <p className="text-white text-sm">Mblah blabl blah BLAH </p>
-                      <p className="text-white text-sm">BLAH BLAH (BLAHHHH%)</p>
-                      <p className="text-white text-sm">blah blah: BLAH</p>
-                      <p className="text-white text-sm">blah:  b l a h</p>
-                    </div>
+                    {/* Most Import Info Section */}
+                <div className="flex-col -mt-8 bg-cumground rounded-lg mb-4" style={{width: '870px'}}>
+                    <h4 className="text-white font-bold text-lg text-center mt-2">Stats Summary (W.I.P) (PLEASE IGNORE)</h4>
+                    <CreateTable />
+                </div>
                   </div>
                 </div>
 
@@ -973,7 +1057,7 @@ function CreateStatsPage({
               {bo3FirstPickData.length > 0 && (
                 <div className="w-full mb-4 max-w-10xl mx-auto">
                   <div className="p-4 bg-cumground rounded-lg">
-                    <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <a className="text-green">Picks</a></h3>
+                    <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <span className="text-green">Picks</span></h3>
                     <div className="w-full h-full">
                       <CreateIcicleGraph 
                         bannedData={BO3Picked}
@@ -981,6 +1065,7 @@ function CreateStatsPage({
                         secondBanData={bo3SecondPick}
                         thirdBanData={[]}
                         type={"picks"}
+                        season={55}
                       />
                     </div>
                   </div>
@@ -990,7 +1075,7 @@ function CreateStatsPage({
                 {bo3FirstBanData.length > 0 && (
                   <div className="w-full mb-4 max-w-10xl mx-auto">
                     <div className="p-4 bg-cumground rounded-lg overflow-hidden">
-                      <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <a className="text-red">Bans</a></h3>
+                      <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <span className="text-red">Bans</span></h3>
                       <div className="w-full ">
                         <CreateIcicleGraph 
                           bannedData={BO3Banned}
@@ -998,6 +1083,7 @@ function CreateStatsPage({
                           secondBanData={bo3SecondBan}
                           thirdBanData={[]} // BO3 typically only has first and second bans
                           type={"bans"}
+                          season={55}
                         />
                       </div>
                     </div>
@@ -1019,14 +1105,9 @@ function CreateStatsPage({
     if (isLoading) {
       return (
         <div>
-          <Card className={`py-4 mt-1 ml-1`} radius="lg">
-            <div className={`flex w-10 h-146`}>
-              <div>
-                <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />
-                <Skeleton className="flex w-65 mb-3 h-114 w-380 ml-2 rounded-medium" />
-              </div>
-            </div>
-          </Card>
+          
+            <StatsSkeleton />
+          
           <footer className="bottom-0 mt-auto flex flex-col items-center justify-center pointer-events-none h-0">
             <span className="text-white ">&copy; {siteConfig.copyright}</span>
             <p className="text-background font-bold text-shadow-lg">{siteConfig.version}</p>

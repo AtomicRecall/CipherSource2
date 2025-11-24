@@ -1,5 +1,5 @@
 "use client";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Image } from "@heroui/react";
 import React from "react";
@@ -15,10 +15,10 @@ import {
 import { Card } from "@heroui/react";
 import FetchLatestUsername from "@/components/FetchLatestUsername";
 import CreateStatsPage from "./CreateStatsPage";
-import StartGettingShit from "./GetAllThatFuckingShit";
+import ObtainVetoInfo from "./FetchVetoInformation";
 import StatsSkeleton from "./StatsSkeleton";
 import RosterSkeleton from "./RosterSkeleton";
-import CreateMatchNavbar from "@/components/StartCreatingSomeNewShit";
+import CreateMatchNavbar from "@/components/CreateMatchNavbar";
 import MatchNavbarSkeleton from "@/components/matchNavbarSkeleton";
 import Flag from "@/components/Flag";
 import CreateSkeleton from "@/components/ProfileCard";
@@ -195,9 +195,10 @@ const SEASON_LOGO_SMALL = 23;
       container.appendChild(card);
     });
   }
-export default function FuckWithProfile() {
+export default function CreateTeamProfile() {
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const user = params.team_id as string;
 
   console.log("🔍 FuckWithProfile rendered with user:", user, "pathname:", pathname);
@@ -228,6 +229,24 @@ export default function FuckWithProfile() {
       sessionStorage.removeItem("lastList");
     }
   }, []);
+
+  // Navigate to /home when user presses Shift+Backspace
+  useEffect(() => {
+    const handleShiftBackspace = (e: KeyboardEvent) => {
+      try {
+        if (e.key === "Backspace" && e.shiftKey) {
+          e.preventDefault();
+          router.push("/home");
+        }
+      } catch (err) {
+        // Fallback to location change if router fails for any reason
+        window.location.href = "/home";
+      }
+    };
+
+    window.addEventListener("keydown", handleShiftBackspace);
+    return () => window.removeEventListener("keydown", handleShiftBackspace);
+  }, [router]);
 
   // Avatar wrapper to handle fallback image
   function Avatar({
@@ -320,7 +339,7 @@ export default function FuckWithProfile() {
   const OpenTeamName = (event: React.MouseEvent<HTMLParagraphElement>) => {
     event.preventDefault(); // if needed
     event.stopPropagation(); // if needed
-    window.open("https://www.faceit.com/en/teams/" + data.teamdata?.team_id);
+    window.open("https://www.faceit.com/en/teams/" + data.teamdata?.team_id+"/leagues");
     // Your custom logic here
   };
 
@@ -410,7 +429,7 @@ export default function FuckWithProfile() {
               console.log("something ",eachDivision.division_name);
               console.log("something clicked",keys.currentKey.substring(4))
               if(eachDivision.division_name == keys.currentKey.substring(4)){
-                const GotMyShit = await StartGettingShit(
+                const GotMyShit = await ObtainVetoInfo(
                   eachDivision.championship_id,
                   data.teamdata?.team_id,
                   parseInt(keys.currentKey.substring(1)),
@@ -579,10 +598,10 @@ export default function FuckWithProfile() {
           
           // Extract season number from the removed item and remove its roster only if no other divisions from this season are selected
           const seasonNumber = eachthinginlist.substring(1, 3);
-          const stillHasSeason = Array.from(selectedKeys).some(key => key.startsWith(`S${seasonNumber}`));
-          if (!stillHasSeason) {
+
+            console.log("Removing roster for season ", seasonNumber);
             removeRosterForSeason(seasonNumber);
-          }
+          
           
           if (lastList.length == 1) {
             setneedsPlaceholder(true);
@@ -774,7 +793,19 @@ export default function FuckWithProfile() {
               <div className="mr-2 w-4" />
             )
           }
-          description={`(${eachDivision["1"].wins} / ${eachDivision["1"].losses}) PO: (${eachDivision["0"].wins} / ${eachDivision["0"].losses})`}
+          description={
+            <span>
+              (
+              <span className="text-green-400">{eachDivision["1"].wins}</span>
+              <span className="text-zinc-400"> / </span>
+              <span className="text-red-400">{eachDivision["1"].losses}</span>
+              ) PO: (
+              <span className="text-green-400">{eachDivision["0"].wins}</span>
+              <span className="text-zinc-400"> / </span>
+              <span className="text-red-400">{eachDivision["0"].losses}</span>
+              )
+            </span>
+          }
         >
           {`S${league.season_number} ${eachDivision["0"].division_name}`}
         </DropdownItem>
@@ -782,7 +813,7 @@ export default function FuckWithProfile() {
     } else {
       // This means the team is in Elite and some other division (Main, Adv)
       console.log("POOOOOOP", league);
-      const divisionItems = eachDivision.map(eachdivisions => {
+      const divisionItems = eachDivision.map((eachdivisions:any) => {
         console.log("WHAT? ", eachdivisions);
         const itemKey = `${baseKey} ${eachdivisions.division_name}`;
         const isLoading = loadingSeasonKeys.has(itemKey);
@@ -825,7 +856,15 @@ export default function FuckWithProfile() {
                 <div className="mr-2 w-4" />
               )
             }
-            description={`(${eachdivisions.wins} / ${eachdivisions.losses})`}
+            description={
+              <span>
+                (
+                <span className="text-green-400">{eachdivisions.wins}</span>
+                <span className="text-zinc-400"> / </span>
+                <span className="text-red-400">{eachdivisions.losses}</span>
+                )
+              </span>
+            }
           >
             {`S${league.season_number} ${eachdivisions.division_name}`}
           </DropdownItem>
@@ -846,7 +885,7 @@ export default function FuckWithProfile() {
                   </div>
                 </div>
                 <div id="PoopEater" className="flex flex-row overflow-x-auto w-full max-w-[98rem]">
-                <Card className="flex-row gap-3 items-center border rounded-lg bg-cumground mt-1 -ml-1 mr-2 flex-shrink-0 min-w-max">
+                <Card className="flex-row gap-3 items-center border rounded-lg bg-cumground mt-1 mr-2 flex-shrink-0 min-w-max">
                     <Image
                                           key={`Season ${thisSeason}Logo`}
                                           alt={`Season 55Logo`}

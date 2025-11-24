@@ -1,7 +1,7 @@
 import fetchUpcomingMatches from "@/components/FetchUpcomingMatches.js";
 import fetchGameStats from "@/components/FetchGameStats.js";
 
-export default async function StartGettingShit(championshipID, teamID, seasonNum, seasonDiv) {
+export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, seasonDiv) {
  // console.log("CHAMP ID: ", championshipID);
   
   const res = await fetchUpcomingMatches(teamID, championshipID);

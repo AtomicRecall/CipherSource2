@@ -53,6 +53,26 @@ export default function CalculateStats({
       className={`absolute z-100 inset-x-0 mx-auto w-fit ${isBo3 ? "mt-0" : "mt-4"}`}
     >
       <div className="flex">
+        {isBo3 
+        ? (
+          <div
+            className="absolute ml-47 mt-1 font-bold [font-size:.7rem] [text-shadow:0px_0px_2px_white] [writing-mode:vertical-rl] [text-orientation:upright]"
+          >
+            {(() => {
+              const date = new Date(stats.teamMatchData.finished_at * 1000);
+              return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date
+                .getDate()
+                .toString()
+                .padStart(2, '0')}/${date.getFullYear()}`;
+            })()}
+          </div>
+
+          )
+          :(<div className="absolute ml-13 -mt-3 font-bold [text-shadow:0px_0px_5px_white]">{(() => {
+          const date = new Date(stats.teamMatchData.finished_at * 1000);
+          return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+        })()}</div>)}
+        
         <div className="">
           {/*team 1*/}
 
@@ -80,7 +100,10 @@ export default function CalculateStats({
         >
           {isBo3
             ? calculateBO3score(stats)
-            : stats.matchData.rounds[0].round_stats.Score}
+            : stats.matchData.rounds[0].round_stats.Score
+              .split('/')
+              .map((s: string) => s.trim().padStart(2, '0'))
+              .join(' / ')}
         </h2>
 
         {/*team 2*/}
@@ -114,7 +137,7 @@ export default function CalculateStats({
                       key={map.round_stats.Score}
                       className="text-xs text-black [text-shadow:0px_1px_2px_white] text-center font-bold underline"
                     >
-                      {map.round_stats.Score}
+                      {map.round_stats.Score.split('-').map((s: string) => s.padStart(2, '0')).join('-')}
                     </p>
                   </div>
                 );

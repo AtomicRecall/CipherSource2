@@ -1,10 +1,3 @@
-// Helper function to get FACEIT headers
-function getFaceitHeaders() {
-  return {
-    'accept': 'application/json',
-    'Authorization': `Bearer 503892e2-2d7b-4373-ab3e-69f53a6acdd3`
-  };
-}
 function showTypesOfInputs(){
     try {
         // Avoid duplicate overlays
@@ -15,7 +8,7 @@ function showTypesOfInputs(){
         overlay.classList.add('no-input-overlay-types');
         overlay.style.position = 'absolute';
         overlay.style.left = '50%';
-        overlay.style.top = '220px';
+        overlay.style.top = '205px';
         overlay.style.transform = 'translateX(-50%)';
         overlay.style.background = 'rgba(0, 0, 0, 0.58)';
         overlay.style.color = 'white';
@@ -28,12 +21,20 @@ function showTypesOfInputs(){
         overlay.style.textAlign = 'left';
 
     const text = document.createElement('div');
-    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>';        
+    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>- FACEIT Match ID<br>- Direct Match URL';        
         text.style.textAlign = 'left';
         overlay.appendChild(text);
 
 
-        document.body.appendChild(overlay);
+        // Append overlay to the main container so it moves with the app UI
+        const parentContainer = document.querySelector('.container') || document.querySelector('.root') || document.body;
+        try {
+          const parentStyle = window.getComputedStyle(parentContainer);
+          if (parentStyle.position === 'static') {
+            parentContainer.style.position = 'relative';
+          }
+        } catch (e) { /* ignore if computed style unavailable */ }
+        parentContainer.appendChild(overlay);
         
     } catch (e) {
         console.error('showTypesOfInputs error', e);
@@ -70,7 +71,14 @@ function showOverlay() {
 
 
 
-  document.body.appendChild(overlay);
+  // Append the links overlay into the main container so it remains inside
+  // the main UI and moves when the container shifts/zooms.
+  const parentContainer = document.querySelector('.container') || document.querySelector('.root') || document.body;
+  try {
+    const parentStyle = window.getComputedStyle(parentContainer);
+    if (parentStyle.position === 'static') parentContainer.style.position = 'relative';
+  } catch (e) {}
+  parentContainer.appendChild(overlay);
   // trigger fade-in on next frame
   requestAnimationFrame(() => { overlay.style.opacity = '1'; });
 
@@ -108,6 +116,7 @@ window.onload = () => {
           window.location.href = `/search/${encodeURIComponent(val)}`;
         } else {
           alert("You wrote nothing in the input!");
+          document.getElementById("searchText").disabled = false;
         }
       };
     }
@@ -168,8 +177,8 @@ window.onload = () => {
         document.querySelector(".search-icon circle").style.stroke = "#000000";
         document.querySelector(".search-icon line").style.stroke = "#000000";
         document.querySelectorAll("#thing").forEach(el => {  el.style.background ="#000000";});
-                     document.getElementById("searchText").disabled = false;
-             document.getElementById("searchText").value = "";
+        document.getElementById("searchText").disabled = false;
+        document.getElementById("searchText").value = "";
         } else {
         classes.add('search-open');
         const searchIcon = document.querySelector('.search-icon');
@@ -256,6 +265,7 @@ window.onload = () => {
       } else {
         console.log('[SearchIcon] no input, alerting user');
         alert('You wrote nothing in the input!');
+        document.getElementById("searchText").disabled = false;
       }
     });
   } else {
@@ -268,9 +278,10 @@ function fadeInViaTransition(el, duration = 500) {
   el.style.transition = `opacity ${duration}ms ease`;
   // Force a reflow so the browser commits opacity:0 as a starting point
   void el.offsetWidth; // or el.getBoundingClientRect();
-                  document.getElementById("searchText").disabled = false;
+  document.getElementById("searchText").disabled = false;
 
   el.style.opacity = 1;
+
 }
 
 
@@ -289,6 +300,7 @@ document.getElementById("searchText").addEventListener('keydown', (event) => {
       window.location.href = `/search/${encodeURIComponent(val)}`;
     } else {
       alert('You wrote nothing in the input!');
+      document.getElementById("searchText").disabled = false;
     }
   }
 });

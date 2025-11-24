@@ -25,6 +25,16 @@
   transform: translate(-50%, -50%);
 }
 
+.home-icon {
+  width: 45px;
+  height: 45px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  fill: currentColor;
+}
+
 .menu:hover {
   color: white;
   background: rgba(83, 83, 83, 0.603);

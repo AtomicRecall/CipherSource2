@@ -1,6 +1,4 @@
 
-
-
 document.getElementById("searchText").addEventListener('keydown', (event) => {
   // Case 1: Shift + Backspace → go to /home
   if (event.shiftKey && event.key === 'Backspace') {
@@ -84,8 +82,22 @@ function runSearchFromURL() {
                 }
             }
         }
+        let ismatchID = false;
+        // If the candidate contains a match ID (format: 1-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+        // extract and prefer that. Example: 1-7fbfb192-a227-499a-ae86-26fbf4d24311
+        if (candidate) {
+            try {
+                const matchIdRegex = /1-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+                const m = candidate.match(matchIdRegex);
+                if (m && m[0]) {
+                    console.log('[runSearchFromURL] match id detected in candidate:', m[0]);
+                    candidate = m[0];
+                    ismatchID = true;
+                }
+            } catch (e) { /* ignore regex errors */ }
+        }
 
-    if (candidate && candidate.trim() !== '') {
+        if (candidate && candidate.trim() !== '') {
             // populate the input so user sees the query
             const inputEl = document.getElementById('searchText');
             if (inputEl) {
@@ -217,7 +229,7 @@ function processTeamData(teamData, teamId) {
 
         let name = document.createElement('div');
         name.id = 'name';
-        name.innerHTML = teamData.name + "<a>(" + (teamData.nickname || '') + ")</a>";
+        name.innerHTML = teamData.name + "<span>(" + (teamData.nickname || '') + ")</span>";
         name.style.color = 'white';
         encompassingDivider.appendChild(name);
 
@@ -540,7 +552,10 @@ function showOverlay() {
         overlay.appendChild(text);
 
 
-        document.body.appendChild(overlay);
+        // Append into main container so overlay is part of the UI container
+        const parentContainer = document.querySelector('.container') || document.querySelector('.root') || document.body;
+        try { if (window.getComputedStyle(parentContainer).position === 'static') parentContainer.style.position = 'relative'; } catch (e) {}
+        parentContainer.appendChild(overlay);
         
     } catch (e) {
         console.error('showOverlay error', e);
@@ -601,7 +616,9 @@ function showNoInputOverlay() {
         overlay.appendChild(text);
 
 
-        document.body.appendChild(overlay);
+        const parentContainer = document.querySelector('.container') || document.querySelector('.root') || document.body;
+        try { if (window.getComputedStyle(parentContainer).position === 'static') parentContainer.style.position = 'relative'; } catch (e) {}
+        parentContainer.appendChild(overlay);
 
     // trigger fade-in
     // allow the browser a tick to apply initial styles
@@ -628,7 +645,7 @@ function showTypesOfInputs(){
         overlay.classList.add('no-input-overlay-types');
         overlay.style.position = 'absolute';
         overlay.style.left = '50%';
-        overlay.style.top = '220px';
+        overlay.style.top = '205px';
         overlay.style.transform = 'translateX(-50%)';
         overlay.style.background = 'rgba(0, 0, 0, 0.58)';
         overlay.style.color = 'white';
@@ -641,12 +658,14 @@ function showTypesOfInputs(){
         overlay.style.textAlign = 'left';
 
     const text = document.createElement('div');
-    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>';        
+    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>- FACEIT Match ID<br>- Direct Match URL';        
         text.style.textAlign = 'left';
         overlay.appendChild(text);
 
 
-        document.body.appendChild(overlay);
+        const parentContainer = document.querySelector('.container') || document.querySelector('.root') || document.body;
+        try { if (window.getComputedStyle(parentContainer).position === 'static') parentContainer.style.position = 'relative'; } catch (e) {}
+        parentContainer.appendChild(overlay);
         
     } catch (e) {
         console.error('showTypesOfInputs error', e);
@@ -681,7 +700,9 @@ function showNoOutputOverlay() {
         overlay.appendChild(text);
 
 
-        document.body.appendChild(overlay);
+        const parentContainer = document.querySelector('.container') || document.querySelector('.root') || document.body;
+        try { if (window.getComputedStyle(parentContainer).position === 'static') parentContainer.style.position = 'relative'; } catch (e) {}
+        parentContainer.appendChild(overlay);
 
     // trigger fade-in
     // allow the browser a tick to apply initial styles
