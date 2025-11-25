@@ -65,7 +65,7 @@ function showOverlay() {
     overlay.style.transition = 'opacity 300ms ease';
 
         const text = document.createElement('div');
-        text.innerHTML = 'Skip this page next time by using these links:<br>- cipher.onl/search/YOUR_INPUT_HERE <br>- cipher.onl/search?YOUR_INPUT_HERE <br>- cipher.onl/search?input=YOUR_INPUT_HERE <br>Or, skip directly to the team page by using this link:<br>- cipher.onl/TEAM_ID_HERE ----MAKE SURE TO ONLY USE TEAMID FOR THIS LINK';
+        text.innerHTML = 'Skip this page next time by using these links:<br>- cipher.onl/search/YOUR_INPUT_HERE <br>- cipher.onl/search?YOUR_INPUT_HERE <br>- cipher.onl/search?input=YOUR_INPUT_HERE <br>Or, skip directly to the team page by using this link:<br>- cipher.onl/TEAM_ID_OR_MATCH_ID_HERE';
         text.style.textAlign = 'left';
         overlay.appendChild(text);
 
