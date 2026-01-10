@@ -10,7 +10,7 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
   let Stats = [];
 
   for (const match of fart.payload.items) {
-    console.log("penis 123",match);
+   // console.log("penis 123",match);
     let shouldFinish = false;
     for (const team of match.factions){
       if(team.id == "bye" || match.status == "dummy"){
@@ -24,7 +24,7 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
     let fac2id;
 
     for(const faction of match.factions){
-      console.log("FACTION: ",faction);
+    //  console.log("FACTION: ",faction);
       switch(faction.number){
         case 1:
           fac1id = faction.id;
@@ -44,7 +44,7 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
         if(stats.PicksAndBans["payload"].tickets[2].entities[d].status == "pick"){
             amtOfPicks++;
         }
-        console.log("SELECTED BY??!? ",stats.PicksAndBans["payload"].tickets[2].entities[d].selected_by);
+       // console.log("SELECTED BY??!? ",stats.PicksAndBans["payload"].tickets[2].entities[d].selected_by);
         if (stats.PicksAndBans["payload"].tickets[2].entities[d].selected_by === "faction1") {
           stats.PicksAndBans["payload"].tickets[2].entities[d].selected_by = fac1id;
         } 

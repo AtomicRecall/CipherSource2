@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import CreateTeamProfile from "@/components/CreateTeamProfile";
 import MenuButton from "@/components/returnButton";
 
-export default function TeamPage({ params }: { params: { team_id: string } }) {
-  const { team_id } = params;
+export default async function TeamPage({ params }: { params: { team_id: string } | Promise<{ team_id: string }> }) {
+  // params may be a Promise in some Next.js runtime contexts; await it to access properties safely
+  const { team_id } = (await params) as { team_id: string };
 
   // Check if team_id is a match ID (format: number-UUID)
   const matchIdRegex = /^\d+-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

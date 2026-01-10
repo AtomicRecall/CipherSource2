@@ -25,7 +25,7 @@ function whatColor(mapname: string): string {
   }
 }
 export const MyBarCanvas = ({ data }: { data: any }) => {
-  console.log("MyBarCanvas received data:", data);
+ // console.log("MyBarCanvas received data:", data);
   
   if (!data || data.length === 0) {
     return <div className="text-white text-center">No data available!</div>;
@@ -70,7 +70,7 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
   const maxHeight = 600; // Maximum height for many maps
   const heightPerMap = 40; // Height per map
   const calculatedHeight = Math.min(maxHeight, Math.max(minHeight, mapCount * heightPerMap));
-  console.log("organize infofr", processedData);
+ // console.log("organize infofr", processedData);
   let mostPlayed:any = [];
   let leastPlayed:any = [];
   let maxCount = 0;
@@ -133,7 +133,7 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
             const wins = Number(d.data.wins) || 0;
             const losses = Number(d.data.losses) || 0;
             const totalPlayed = Number(d.data.totalPlayed) || (wins + losses);
-            console.log('Label function called:', { id: d.id, data: d.data, totalPlayed });
+           // console.log('Label function called:', { id: d.id, data: d.data, totalPlayed });
 
             // If no data, don't show any text
             if (totalPlayed === 0) {
@@ -145,7 +145,7 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
               const winRate = totalPlayed > 0 ? Math.round((wins / totalPlayed) * 100) : 0;
               if (winRate > 0) {
                 const result = `WR: ${winRate}%`;
-                console.log('Wins case:', result);
+              //  console.log('Wins case:', result);
                 return result;
               }
               return '';
@@ -156,13 +156,13 @@ export const MyBarCanvas = ({ data }: { data: any }) => {
               const lossesNum = losses;
               if (lossesNum > 0) {
                 const result = `L: ${lossesNum}`;
-                console.log('Losses case:', result);
+               // console.log('Losses case:', result);
                 return result;
               }
               return '';
             }
 
-            console.log('No match case, returning empty');
+           // console.log('No match case, returning empty');
             return '';
           }}
           labelTextColor="#ffffff"

@@ -5,6 +5,7 @@ import { Image } from "@heroui/react";
 import React from "react";
 import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
+import SearchText from "./SearchText";
 import {
   Dropdown,
   DropdownTrigger,
@@ -50,7 +51,7 @@ const SEASON_LOGO_SMALL = 23;
     // Remove skeleton if it exists
     const skeletonCard = document.getElementById(`roster-skeleton-${season}`);
     if (skeletonCard) {
-      console.log(`Removing skeleton for season ${season}`);
+     // console.log(`Removing skeleton for season ${season}`);
       skeletonCard.remove();
     }
 
@@ -125,7 +126,7 @@ const SEASON_LOGO_SMALL = 23;
       }
       avatarDiv.onclick = () => window.open("https://www.faceit.com/en/players/" + (member1?.latest_player_name));
 
-      console.log("AVATAR ID?? "+member1?.avatar_img);
+     // console.log("AVATAR ID?? "+member1?.avatar_img);
 
       const avatarImg = document.createElement('img');
             if(member1.count <= MostMatchesPlayed/2){
@@ -164,7 +165,7 @@ const SEASON_LOGO_SMALL = 23;
       rosterCard.remove();
      // console.log(`Removed roster for season ${season}`);
     } else {
-      console.log(`No roster found for season ${season}`);
+     // console.log(`No roster found for season ${season}`);
     }
 
     // Also remove skeleton if it exists
@@ -202,11 +203,11 @@ export default function CreateTeamProfile() {
   const user = params.team_id as string;
   const isMatchId = /^\d+-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(user);
   (isMatchId)?window.location.href="/search/"+user:null;
-  console.log("🔍 FuckWithProfile rendered with user:", user, "pathname:", pathname);
+  //console.log("🔍 FuckWithProfile rendered with user:", user, "pathname:", pathname);
 
   // Early return if no user (team_id) or if we're not on a team route - prevents any rendering or API calls
   if (!user || pathname === '/home' || pathname === '/') {
-    console.log("❌ No user found or not on team route, returning null");
+   // console.log("❌ No user found or not on team route, returning null");
     return null;
   }
 
@@ -277,22 +278,23 @@ export default function CreateTeamProfile() {
   }
 
   useEffect(() => {
-    console.log("🔄 useEffect triggered with user:", user, "pathname:", pathname);
+  //  console.log("🔄 useEffect triggered with user:", user, "pathname:", pathname);
     
     // Double-check that user exists and we're on a team route before making API calls
     if (!user || pathname === '/home' || pathname === '/') {
-      console.log("❌ No user or not on team route in useEffect, skipping API call");
+    //  console.log("❌ No user or not on team route in useEffect, skipping API call");
       return;
     }
 
     async function loadProfile() {
-      console.log("🚀 Starting to load profile for user:", user);
+     // console.log("🚀 Starting to load profile for user:", user);
       setLoading(true);
       try {
         const res = await fetchTeamProfile(user); // must return a Promise
 
-        console.log("✅ Raw team profile data:", res);
+       // console.log("✅ Raw team profile data:", res);
         setData(res);
+        document.getElementById("searchText")?.setAttribute("value", res.teamdata?.name);
         document.title = "CS2 - " + res.teamdata?.name;
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -371,7 +373,7 @@ export default function CreateTeamProfile() {
     // Accept the change (additions or allowed removals)
     setSelectedKeys(keys);
     setneedsPlaceholder(false);
-    console.log(keys);
+    //console.log(keys);
 
     let B4Size = 0;
     let lastList: any[] = [];
@@ -381,8 +383,8 @@ export default function CreateTeamProfile() {
       B4Size = parseInt(sessionStorage.getItem("sizeBeforeClick") ?? "0", 10);
       lastList = JSON.parse(sessionStorage.getItem("lastList") ?? "[]");
 
-      console.log("Previous sizeBeforeClick:", B4Size);
-      console.log("Previous lastList:", lastList);
+     // console.log("Previous sizeBeforeClick:", B4Size);
+     // console.log("Previous lastList:", lastList);
 
       // Convert keys to array safely
       let entries: any[] = Array.isArray(keys)
@@ -391,21 +393,21 @@ export default function CreateTeamProfile() {
           ? Array.from(keys)
           : Object.values(keys);
 
-      console.log("Current entries to save:", entries);
+     // console.log("Current entries to save:", entries);
 
       // Write updated values
       sessionStorage.setItem("sizeBeforeClick", curSize.toString());
       sessionStorage.setItem("lastList", JSON.stringify(entries));
 
-      console.log(
-        "Updated sizeBeforeClick:",
-        sessionStorage.getItem("sizeBeforeClick"),
-      );
-      console.log("Updated lastList:", sessionStorage.getItem("lastList"));
+    //  console.log(
+      //  "Updated sizeBeforeClick:",
+      //  sessionStorage.getItem("sizeBeforeClick"),
+     // );
+     // console.log("Updated lastList:", sessionStorage.getItem("lastList"));
     }
 
     if (B4Size - curSize < 0) {
-      console.log("ADD "+parseInt(keys.currentKey.substring(1, 3)));
+     // console.log("ADD "+parseInt(keys.currentKey.substring(1, 3)));
 
       const currentKey = keys.currentKey;
       // mark this season as loading (used to block removals and show spinner)
@@ -419,16 +421,16 @@ export default function CreateTeamProfile() {
 
 
       for (const season of data.leagues[0].league_seasons_info) {
-        console.log("CHECK SEASON ",season.season_number);
-        console.log("CURRENT KEY SEASON ",parseInt(keys.currentKey.substring(1, 3)));
+       // console.log("CHECK SEASON ",season.season_number);
+        //console.log("CURRENT KEY SEASON ",parseInt(keys.currentKey.substring(1, 3)));
         if (parseInt(season.season_number) === parseInt(keys.currentKey.substring(1, 3))) {
           let GotAllMyShit = [];
             
             for (const standing of season.season_standings) {
-            console.log("JON HAS A FUNNY PENIS !!! ",standing);
+           // console.log("JON HAS A FUNNY PENIS !!! ",standing);
             for(const eachDivision of standing){
-              console.log("something ",eachDivision.division_name);
-              console.log("something clicked",keys.currentKey.substring(4))
+             // console.log("something ",eachDivision.division_name);
+             // console.log("something clicked",keys.currentKey.substring(4))
               if(eachDivision.division_name == keys.currentKey.substring(4)){
                 const GotMyShit = await ObtainVetoInfo(
                   eachDivision.championship_id,
@@ -437,7 +439,7 @@ export default function CreateTeamProfile() {
                   eachDivision.division_name,
                 );
                 eachDivision.SeasonNumber = season.season_number;
-                console.log("Cogt my shit? ",GotMyShit)
+               // console.log("Cogt my shit? ",GotMyShit)
                 for (const eachmatch of GotMyShit) {
                   GotAllMyShit.push(eachmatch);
                 }
@@ -458,14 +460,14 @@ export default function CreateTeamProfile() {
             }
           
           
-            console.log("GOT ALL MY FUCING SHIT??? ",GotAllMyShit);
-            console.log("UMMMM??? ",season);
+           // console.log("GOT ALL MY FUCING SHIT??? ",GotAllMyShit);
+           // console.log("UMMMM??? ",season);
           GotAllMyShit.sort(
             (a: any, b: any) =>
               b.teamMatchData.finished_at - a.teamMatchData.finished_at,
           );
           if(B4Size == 0){
-            console.log("WHAT IS IN HERE ??? ",season);
+          //  console.log("WHAT IS IN HERE ??? ",season);
             setUiNode((prev) => [
             <div
               key={`S${season.season_number}-${keys.currentKey.substring(4)}`}
@@ -507,18 +509,18 @@ export default function CreateTeamProfile() {
             prev ? [...prev, ...GotAllMyShit] : GotAllMyShit,
           );
           
-          console.log("GOT ALL MY SHIT? ", GotAllMyShit);
+          //console.log("GOT ALL MY SHIT? ", GotAllMyShit);
 
           //Find all of the players of every match, add them to an array that sorts players based of how much games they played
           //if the games played by the user is over half of the most games played by someone, then that means they are an actual player, otherwise they are a sub.
           let PlayedPlayers: PlayerStats[] = [];
           for(const game of GotAllMyShit){
             for(const match of  game.matchData.rounds){
-              console.log("LALALALAL ",match);
+             // console.log("LALALALAL ",match);
               for(const team of match.teams){
                 
                 if(team.team_id === data.teamdata?.team_id){
-                  console.log("TEAM = ",team);
+                 // console.log("TEAM = ",team);
                   for (const player of team.players){
                       const plyrObj = PlayedPlayers.find(
                         (obj) => obj.player_id === player.player_id,
@@ -554,7 +556,7 @@ export default function CreateTeamProfile() {
             }
           }
 
-          console.log("GOT ALL PLAYED PLAYERS: ",PlayedPlayers);
+         // console.log("GOT ALL PLAYED PLAYERS: ",PlayedPlayers);
           if(season.season_number != thisSeason){
              addRosterForSeason(PlayedPlayers, season.season_number)
 
@@ -574,8 +576,8 @@ export default function CreateTeamProfile() {
         }
       }
     } else if (B4Size - curSize > 0) {
-      console.log("REMOVE");
-      console.log("GET DOWN " + lastList);
+     // console.log("REMOVE");
+      //console.log("GET DOWN " + lastList);
       const nowList: any[] = JSON.parse(
         sessionStorage.getItem("lastList") ?? "[]",
       );
@@ -593,14 +595,14 @@ export default function CreateTeamProfile() {
         }
 
         if (!found) {
-          console.log("Removed item:" + eachthinginlist + "-");
+        //  console.log("Removed item:" + eachthinginlist + "-");
           removedIds.push(eachthinginlist);
           // Do something with the removed item here
           
           // Extract season number from the removed item and remove its roster only if no other divisions from this season are selected
           const seasonNumber = eachthinginlist.substring(1, 3);
 
-            console.log("Removing roster for season ", seasonNumber);
+           // console.log("Removing roster for season ", seasonNumber);
             removeRosterForSeason(seasonNumber);
           
           
@@ -610,7 +612,7 @@ export default function CreateTeamProfile() {
           let newData = [];
 
           for (const eachMatch of TeamData) {
-            console.log("WHAT THE BALLSACK ",eachMatch);
+           // console.log("WHAT THE BALLSACK ",eachMatch);
             if (
               !(
                 eachMatch.matchData.seasonNum == eachthinginlist.substring(1, 3) &&
@@ -620,19 +622,22 @@ export default function CreateTeamProfile() {
               newData.push(eachMatch);
             }
           }
-          console.log("Every match other than the one that we got ", newData);
+         // console.log("Every match other than the one that we got ", newData);
           setTeamData(newData);
         }
       }
       // Update uiNode to remove the corresponding elements
       setUiNode(prev => prev.filter(node => !removedIds.includes(node.props.id)));
     } else {
-      console.log("NOTHING GOT CLICKED YO");
+     // console.log("NOTHING GOT CLICKED YO");
     }
   };
 
   return (
     <div key={"TeamProfileCard"}>
+      <div className="w-full flex justify-center items-center -mt-13.5 absolute">
+        <SearchText />
+      </div>
       {loading ? (
         <CreateSkeleton />
       ) : (
@@ -741,16 +746,16 @@ export default function CreateTeamProfile() {
                                   for (const poopfart of league.season_standings) {
                                     standing.push(poopfart);
                                   }
-                                  console.log("WHAT IS THIS STANDING HERE!! ",standing);
+                                  //console.log("WHAT IS THIS STANDING HERE!! ",standing);
 
                                   // compute the common key used by dropdown
                                   const baseKey = `S${league.season_number}`;
 
                                   if (standing.length >= 1) {
-  console.log("JON HAS A MILENKI PENIS ", standing);
+ // console.log("JON HAS A MILENKI PENIS ", standing);
   const items = [];
   for (const eachDivision of standing) {
-    console.log(`EACH FRIGGEN DIVISION SEASON ${league.season_number}`, eachDivision);
+   // console.log(`EACH FRIGGEN DIVISION SEASON ${league.season_number}`, eachDivision);
 
     if (eachDivision["1"] && eachDivision["0"].division_name === eachDivision["1"].division_name) {
       const itemKey = `${baseKey} ${eachDivision["0"].division_name}`;
@@ -813,9 +818,9 @@ export default function CreateTeamProfile() {
       );
     } else {
       // This means the team is in Elite and some other division (Main, Adv)
-      console.log("POOOOOOP", league);
+     // console.log("POOOOOOP", league);
       const divisionItems = eachDivision.map((eachdivisions:any) => {
-        console.log("WHAT? ", eachdivisions);
+        //console.log("WHAT? ", eachdivisions);
         const itemKey = `${baseKey} ${eachdivisions.division_name}`;
         const isLoading = loadingSeasonKeys.has(itemKey);
         return (

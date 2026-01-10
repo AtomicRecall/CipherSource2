@@ -4,7 +4,6 @@ import StatsSkeleton from "@/components/StatsSkeleton";
 import React from "react";
 import { siteConfig } from "../config/site";
 import { MyBarCanvas } from "./CreateBarGraph";
-import  CreateTable from "./CreateTable";
 import CreateIcicleGraph from "./CreateIcicleGraph";
 
 
@@ -183,6 +182,7 @@ let W: MapStats[] = [];
 let L: MapStats[] = [];
 let Banned: MapStats[] = [];
 let Picks: MapStats[] = [];
+let LeftOverPick: MapStats[] = [];
 let FirstBan: MapStats[] = [];
 let SecondBan: MapStats[] = [];
 let ThirdBan: MapStats[] = [];
@@ -220,6 +220,7 @@ function CreateStatsPage({
   Banned = [];
   BO3Banned = [];
   Picks = [];
+  LeftOverPick = [];
   FirstBan = [];
   SecondBan = [];
   ThirdBan = [];
@@ -243,7 +244,7 @@ function CreateStatsPage({
   bo3Won = [];
   bo3Lost=[];
 
-  console.log("NO FUCKING WAY ", stats);
+  //console.log("NO FUCKING WAY ", stats);
   const bo1ResetZoomRef = React.useRef<(() => void) | null>(null);
   
   /* Each of these arrays will have an object like this pushed to them:
@@ -278,7 +279,7 @@ function CreateStatsPage({
 
     for (const eachGame of stats) {
       for (const eachGameOfGame of eachGame.matchData.rounds) {
-        console.log("round ", eachGameOfGame);
+       // console.log("round ", eachGameOfGame);
         const mapObj = Played.find(
           (obj) => obj.map_name === eachGameOfGame.round_stats.Map,
         );
@@ -334,11 +335,11 @@ function CreateStatsPage({
           break;
       }
     }
-    console.log("DUBYA ", W);
-    console.log("LOWSE ", L);
-    console.log("played ", Played);
-    console.log("ALL BO1S? ", bo1s);
-    console.log("ALL BO3S? ", bo3s);
+  //  console.log("DUBYA ", W);
+   //// console.log("LOWSE ", L);
+   // console.log("played ", Played);
+   // console.log("ALL BO1S? ", bo1s);
+   //console.log("ALL BO3S? ", bo3s);
 
     for (const eachBo1 of bo1s) {
       let numBan = 0;
@@ -488,6 +489,20 @@ function CreateStatsPage({
             } else {
               Picks.push({ map_name: eachPickOrBan.guid, count: 1 });
             }
+
+            //bo1 picks are always LO (Left-Over) picks, so they will are considered like a third ban in bo3s.
+            const leftoverpick = LeftOverPick.find(
+              (obj:any) => obj.map_name == eachPickOrBan.guid,
+            );
+
+            if (leftoverpick) {
+              leftoverpick.count += 1;
+            } else {
+              LeftOverPick.push({ map_name: eachPickOrBan.guid, count: 1 });
+            }
+            
+            
+
           }
         }
       }
@@ -524,6 +539,7 @@ function CreateStatsPage({
     const LossData = [];
     const PlayedData = [];
     const PickData = [];
+    const LeftOverPickData = [];
     const FirstBanData = [];
     const FirstBanTeamAData = [];
     const FirstBanTeamBData = [];
@@ -583,15 +599,15 @@ function CreateStatsPage({
           }
         }
         }
-        
-
+        let numPickThisGame = 0;
+        let numBanThisGame = 0;
         for (const eachPickOrBan of eachBo3.PicksAndBans.payload.tickets[2]
           .entities) {
-          if (
-            eachPickOrBan.selected_by == SelectedTeam &&
-            eachPickOrBan.status == "pick"
-          ) {
-            numPick++;
+          if (eachPickOrBan.status == "pick") {
+            numPickThisGame++;
+            if (eachPickOrBan.selected_by == SelectedTeam)
+            {
+              numPick++;
             const mapObj1 = Picks.find(
               (obj) => obj.map_name == eachPickOrBan.guid,
             );
@@ -649,10 +665,20 @@ function CreateStatsPage({
                   bo3ThirdPick.push({ map_name: eachPickOrBan.guid, count: 1 });
                 }
 
+                const leftoverpick = LeftOverPick.find(
+              (obj:any) => obj.map_name == eachPickOrBan.guid,
+            );
+
+            if (leftoverpick) {
+              leftoverpick.count += 1;
+            } else {
+              LeftOverPick.push({ map_name: eachPickOrBan.guid, count: 1 });
+            }
                 break;
               default:
                 break;
             }
+          }
           } else if (
             eachPickOrBan.selected_by == SelectedTeam &&
             eachPickOrBan.status == "drop"
@@ -770,8 +796,8 @@ function CreateStatsPage({
           color: whatColor(map.map_name),
         });
       }
-      console.log("BO1 FIRST BAN TEAM A DATA ", bo1FirstBanTeamAData);
-      console.log("BO1 FIRST BAN TEAM B DATA ", bo1FirstBanTeamBData);
+    //  console.log("BO1 FIRST BAN TEAM A DATA ", bo1FirstBanTeamAData);
+    //  console.log("BO1 FIRST BAN TEAM B DATA ", bo1FirstBanTeamBData);
     for (const map of W) {
       WinsData.push({
         id: `${map.map_name}`,
@@ -799,6 +825,14 @@ function CreateStatsPage({
     }
     for (const map of Picks) {
       PickData.push({
+        id: `${map.map_name}`,
+        label: `${map.map_name}`,
+        value: `${map.count}`,
+        color: whatColor(map.map_name),
+      });
+    }
+    for (const map of LeftOverPick) {
+      LeftOverPickData.push({
         id: `${map.map_name}`,
         label: `${map.map_name}`,
         value: `${map.count}`,
@@ -846,7 +880,7 @@ function CreateStatsPage({
         color: whatColor(map.map_name),
       });
     }
-    console.log("Did it work? ",bo1SecondBan, bo1ThirdBan)
+   // console.log("Did it work? ",bo1SecondBan, bo1ThirdBan)
     for (const map of bo1ThirdBan) {
       bo1ThirdBanData.push({
         id: `${map.map_name}`,
@@ -881,6 +915,7 @@ function CreateStatsPage({
       });
     }
 
+   // console.log("BO3 FIRST BAN ", bo3FirstBan);
     for (const map of bo3FirstBan) {
       bo3FirstBanData.push({
         id: `${map.map_name}`,
@@ -945,21 +980,62 @@ function CreateStatsPage({
                  {/* Bar Chart Section */}
                  <div className="flex-1 overflow-hidden">
                    <div className="p-4 rounded-lg">
-                     <div className="bg-cumground rounded-lg -mx-4 mr-0">
+                     <div className="bg-cumground rounded-lg -mx-4">
                        <MyBarCanvas data={transformMapsDataForBarChart(Played, W, L)} />
                      </div>
                    </div>
                  </div>
-                 
-                {/* Most Import Info Section */}
-                <div className="flex-col -mt-8 bg-cumground rounded-lg mb-4" style={{width: '870px'}}>
-                    <h4 className="text-white font-bold text-lg text-center mt-2">Stats Summary (W.I.P) (PLEASE IGNORE)</h4>
-                    <CreateTable />
-                </div>
                </div>
             
             
-            
+            {PickData.length > 0 && (
+                <div className="w-full mb-4 max-w-10xl mx-auto">
+                  <div className="p-4 bg-cumground rounded-lg">
+                        <div style={{ position: 'relative', marginBottom: 8 }}>
+                          
+                          <h3 className="font-bold text-white text-xl" style={{ textAlign: 'center', margin: 0 ,color:'white'}}>BO1+BO3 <span className="text-green">Picks</span></h3>
+                        </div>
+                        <div className=" h-full">
+                          <CreateIcicleGraph 
+                            bannedData={Picks}
+                            firstBanData={bo3FirstPick}
+                            secondBanData={bo3SecondPick}
+                            thirdBanData={LeftOverPick}
+                            bo1FirstBanTeamAData={[]}
+                            bo1FirstBanTeamBData={[]}
+                            resetZoomRef={undefined}
+                            type={"picks"}
+                            season={55}
+                          />
+                          
+                        </div>
+                  </div>
+                </div>
+              )}
+              {Banned.length > 0 && (
+                <div className="w-full mb-4 max-w-10xl mx-auto">
+                  <div className="p-4 bg-cumground rounded-lg">
+                        <div style={{ position: 'relative', marginBottom: 8 }}>
+                          
+                          <h3 className="font-bold text-white text-xl" style={{ textAlign: 'center', margin: 0 ,color:'white'}}>BO1+BO3 <span className="text-red">Bans</span></h3>
+                        </div>
+                        <div className=" h-full">
+                          <CreateIcicleGraph 
+                            bannedData={Banned}
+                            firstBanData={FirstBan}
+                            secondBanData={SecondBan}
+                            thirdBanData={ThirdBan}
+                            bo1FirstBanTeamAData={bo1FirstBanTeamA}
+                            bo1FirstBanTeamBData={bo1FirstBanTeamB}
+                            resetZoomRef={bo1ResetZoomRef}
+                            type={"bans"}
+                            season={55}
+                          />
+                          
+                        </div>
+                  </div>
+                </div>
+              )}
           </Card>:null}
 
           {/*(bo1s should always be outputted)*/}
@@ -972,43 +1048,44 @@ function CreateStatsPage({
                  {/* Bar Chart Section */}
                  <div className="flex-1 overflow-hidden">
                    <div className="p-4 rounded-lg">
-                     <div className="bg-cumground rounded-lg -mx-4 mr-0">
+                     <div className="bg-cumground rounded-lg -mx-4">
                        <MyBarCanvas data={transformMapsDataForBarChart(bo1Played, bo1Won, bo1Lost)} />
                      </div>
                    </div>
                  </div>
-                 
-                {/* Most Import Info Section */}
-                <div className="flex-col -mt-8 bg-cumground rounded-lg mb-4" style={{width: '870px'}}>
-                    <h4 className="text-white font-bold text-lg text-center mt-2">Stats Summary (W.I.P) (PLEASE IGNORE)</h4>
-                    <CreateTable />
-                </div>
+                
                </div>
-              
+              {bo1PickData.length > 0 && (
+                <div className="w-full mb-4 max-w-10xl mx-auto">
+                  <div className="p-4 bg-cumground rounded-lg">
+                        <div style={{ position: 'relative', marginBottom: 8 }}>
+                         
+                          <h3 className="font-bold text-white text-xl" style={{ textAlign: 'center', margin: 0 ,color:'white'}}>BO1 <span className="text-green">Picks</span></h3>
+                        </div>
+                        <div className=" h-full">
+                          <CreateIcicleGraph 
+                            bannedData={bo1Pick}
+                            firstBanData={[]}
+                            secondBanData={[]}
+                            thirdBanData={[]}
+                            bo1FirstBanTeamAData={[]}
+                            bo1FirstBanTeamBData={[]}
+                            resetZoomRef={bo1ResetZoomRef}
+                            type={"picks"}
+                            season={55}
+                          />
+                          
+                        </div>
+                  </div>
+                </div>
+              )}
               {/* Icicle Graph Section for BO1 Bans */}
               {bo1FirstBanData.length > 0 && (
                 <div className="w-full mb-4 max-w-10xl mx-auto">
                   <div className="p-4 bg-cumground rounded-lg">
                         <div style={{ position: 'relative', marginBottom: 8 }}>
-                          <button
-                            onClick={() => bo1ResetZoomRef.current && bo1ResetZoomRef.current()}
-                            style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              background: 'rgba(0,0,0,0.6)',
-                              color: '#fff',
-                              border: '1px solid rgba(255,255,255,0.06)',
-                              padding: '6px 8px',
-                              borderRadius: 6,
-                              cursor: 'pointer',
-                              fontSize: 12,
-                            }}
-                          >
-                            Reset Zoom
-                          </button>
-                          <h3 className="font-bold text-white text-xl" style={{ textAlign: 'center', margin: 0 }}>Bans</h3>
+                          
+                          <h3 className="font-bold text-white text-xl" style={{ textAlign: 'center', margin: 0 ,color:'white'}}>BO1 <span className="text-red">Bans</span></h3>
                         </div>
                         <div className=" h-full">
                           <CreateIcicleGraph 
@@ -1022,10 +1099,13 @@ function CreateStatsPage({
                             type={"bans"}
                             season={55}
                           />
+                          
                         </div>
                   </div>
                 </div>
               )}
+
+              
 
             </div>
           </Card>
@@ -1040,21 +1120,17 @@ function CreateStatsPage({
                     {/* Bar Chart Section */}
                     <div className="flex-1 overflow-hidden">
                    <div className="p-4 rounded-lg">
-                     <div className="bg-cumground rounded-lg -mx-4 mr-0">
+                     <div className="bg-cumground rounded-lg -mx-4">
                        <MyBarCanvas data={transformMapsDataForBarChart(bo3Played, bo3Won, bo3Lost)} />
                      </div>
                    </div>
                  </div>
-                    {/* Most Import Info Section */}
-                <div className="flex-col -mt-8 bg-cumground rounded-lg mb-4" style={{width: '870px'}}>
-                    <h4 className="text-white font-bold text-lg text-center mt-2">Stats Summary (W.I.P) (PLEASE IGNORE)</h4>
-                    <CreateTable />
-                </div>
                   </div>
                 </div>
 
               {/* Icicle Graph Section for BO3 Bans */}
               {bo3FirstPickData.length > 0 && (
+               // console.log("BO3 FIRST BAN DATA ", bo3FirstBanData),
                 <div className="w-full mb-4 max-w-10xl mx-auto">
                   <div className="p-4 bg-cumground rounded-lg">
                     <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <span className="text-green">Picks</span></h3>
@@ -1063,7 +1139,7 @@ function CreateStatsPage({
                         bannedData={BO3Picked}
                         firstBanData={bo3FirstPick}
                         secondBanData={bo3SecondPick}
-                        thirdBanData={[]}
+                        thirdBanData={bo3ThirdPick}
                         type={"picks"}
                         season={55}
                       />
@@ -1073,10 +1149,11 @@ function CreateStatsPage({
               )}
                 {/* Icicle Graph Section for BO3 Bans */}
                 {bo3FirstBanData.length > 0 && (
+                  
                   <div className="w-full mb-4 max-w-10xl mx-auto">
                     <div className="p-4 bg-cumground rounded-lg overflow-hidden">
                       <h3 className="text-center mb-4 font-bold text-white text-xl">BO3 <span className="text-red">Bans</span></h3>
-                      <div className="w-full ">
+                      <div className="w-full h-full">
                         <CreateIcicleGraph 
                           bannedData={BO3Banned}
                           firstBanData={bo3FirstBan}

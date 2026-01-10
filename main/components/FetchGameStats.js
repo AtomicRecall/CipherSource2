@@ -32,7 +32,7 @@ export default async function fetchGameStats(matchid, seasonNum, seasonDiv) {
       }
     } else {
       teamMatchData = await teamMatchData.json();
-      console.log("winner? "+teamMatchData.results?.winner)
+     // console.log("winner? "+teamMatchData.results?.winner)
       if (teamMatchData.results?.winner) {
         
         if(teamMatchData.results.winner == "faction1"){
@@ -43,7 +43,7 @@ export default async function fetchGameStats(matchid, seasonNum, seasonDiv) {
         }
   
       }
-      console.log("winner!"+teamMatchData.results.winner)
+      //console.log("winner!"+teamMatchData.results.winner)
     }
 
     // 3️⃣ Fetch match stats

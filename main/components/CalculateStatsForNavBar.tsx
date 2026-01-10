@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from "react";
 import { Image } from "@heroui/react";
-import { useState } from "react";
 
 interface CalculateStatsProps {
   stats: any;
@@ -7,42 +7,47 @@ interface CalculateStatsProps {
   SelectedTeam: any;
 }
 
+// Memoized Avatar component placed outside the parent so it doesn't re-create on every re-render.
+const Avatar = React.memo(function Avatar({
+  src,
+  alt,
+  size = 50,
+  radius = "sm",
+}: {
+  src: string;
+  alt: string;
+  size?: number;
+  radius?: "sm" | "md" | "lg" | "full";
+  className?: string;
+}) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  // Keep internal src in sync when parent changes src prop
+  useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
+
+  return (
+    <Image
+      alt={alt}
+      height={size}
+      radius={radius}
+      src={imgSrc ? imgSrc : "/images/DEFAULT.jpg"}
+      width={size}
+      onError={() => setImgSrc("/images/DEFAULT.jpg")}
+    />
+  );
+});
+
 export default function CalculateStats({
   stats,
   isBo3,
   SelectedTeam,
 }: CalculateStatsProps) {
-  console.log("IS THIS SHIT BO3? ", isBo3);
-  console.log("OUR TEAM ", SelectedTeam);
-  console.log("FUCK ME IN THE BOOTYHOLE ", stats);
+ // console.log("IS THIS SHIT BO3? ", isBo3);
+ // console.log("OUR TEAM ", SelectedTeam);
+ // console.log("FUCK ME IN THE BOOTYHOLE ", stats);
   stats = stats.stats;
-  // Avatar wrapper to handle fallback image
-  function Avatar({
-    src,
-    alt,
-    size = 50,
-    radius = "sm",
-  }: {
-    src: string;
-    alt: string;
-    size?: number;
-    radius?: "sm" | "md" | "lg" | "full";
-    className?: string;
-  }) {
-    const [imgSrc, setImgSrc] = useState(src);
-
-    return (
-      <Image
-        key={imgSrc}
-        alt={alt}
-        height={size}
-        radius={radius}
-        src={imgSrc ? imgSrc : "/images/DEFAULT.jpg"}
-        width={size}
-        onError={() => setImgSrc("/images/DEFAULT.jpg")}
-      />
-    );
-  }
 
   function calculateBO3score(stats: any) {
     return +stats.teamMatchData.results.score.faction1 + " / " + stats.teamMatchData.results.score.faction2;

@@ -217,14 +217,14 @@ const transformBanDataForIcicle = (
 
   // use non-breaking spaces (\u00A0) so the gap is preserved in HTML/SVG rendering
   const bigGap = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
-  let defaultID = "Most " + WHATTYPE + " = " + mostNames + " (" + most[0]?.count + ")" + bigGap + bigGap + bigGap + bigGap + bigGap + "[First " + TYPEOTHER + " = " + firstNames + "]" + bigGap + bigGap + bigGap + bigGap + bigGap + " Least " + WHATTYPE + " = " + leastNames + " (" + least[0]?.count + ")";
+  let defaultID = "Most " + WHATTYPE + " = " + mostNames + " (" + most[0]?.count + ")" +bigGap+" Least " + WHATTYPE + " = " + leastNames + " (" + least[0]?.count + ")";
   if(most[0]?.count == least[0]?.count){
     defaultID = "Total " + WHATTYPE+" = "+count;
   }
   // Create the root node (do NOT set a value on the root; let the layout compute
   // parent sizes from children to avoid double-counting)
   const rootNode: IcicleData = {
-    id:  "Total " + WHATTYPE+" = "+count,
+    id:  defaultID,
     name: '',
     total: 0,
     MaxTotal: count,
@@ -245,7 +245,7 @@ const transformBanDataForIcicle = (
       return; // skip this iteration
     }
     const mapNode: IcicleData = {
-      id: ((map.count > 2) ? normalizeKey(map.map_name).substring(0,1).toLocaleUpperCase() + normalizeKey(map.map_name).substring(1) : normalizeKey(map.map_name).substring(0,1).toLocaleUpperCase() + normalizeKey(map.map_name).substring(1,3)) + ' - ' + map.count.toString(),
+      id: ((map.count > 2 || count < 40) ? normalizeKey(map.map_name).substring(0,1).toLocaleUpperCase() + normalizeKey(map.map_name).substring(1) : normalizeKey(map.map_name).substring(0,1).toLocaleUpperCase() + normalizeKey(map.map_name).substring(1,3)) + ' - ' + map.count.toString(),
       name: map.map_name,
       MaxTotal: count,
       total: count,
@@ -323,7 +323,15 @@ const transformBanDataForIcicle = (
 
     if (thirdBanEntry && thirdBanEntry.count > 0) {
       mapNode.children!.push({
-        id: ((thirdBanEntry.count > 2)?"Third - "+thirdBanEntry.count.toString() : "3rd - "+thirdBanEntry.count.toString()),
+        id: (
+          type === "picks"
+            ? (thirdBanEntry.count > 2
+                ? "Left-Over - " + thirdBanEntry.count.toString()
+                : "LO - " + thirdBanEntry.count.toString())
+            : (thirdBanEntry.count > 2
+                ? "Third - " + thirdBanEntry.count.toString()
+                : "3rd - " + thirdBanEntry.count.toString())
+        ),
         name: map.map_name,
         total: bannedAll.find(m => m.map_name === map.map_name)?.count || 0,
         MaxTotal: count,
@@ -631,15 +639,18 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
         labelAlign="center"
         labelRotation={0}
         label={(node: any) => node?.id || node?.data?.id || ''}
-        borderWidth={1}
-        animate={false}
-        motionConfig="gentle"
+        borderWidth={0}
+        borderRadius={3}
+        zoomMode="global"
+        motionConfig={{ mass: 1, tension: 401, friction: 50, clamp: false, precision: 0.01, velocity: 0 }}
+        
         labelTextColor="#020202ff"
         
         theme={{
           labels: {
             text: {
-              fontSize: 15,
+              //bacarrat method: the closer the number is to 9 the bigger the font size, lower than 9 means higher font size, bigger than 9 means smaller font size
+              fontSize: (15),
               fill: '#ffffff',
               fontFamily: 'Play, sans-serif',
               fontWeight: '600',
@@ -654,13 +665,13 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
           // print the node to browser console for debugging (open devtools)
           try {
             // eslint-disable-next-line no-console
-            console.log('icicle-tooltip node:', node, {
-              id: node?.id,
-              data: node?.data,
-              value: node?.value,
-              percentage: node?.percentage,
-              parentId: node?.parent?.id
-            });
+            //console.log('icicle-tooltip node:', node, {
+            //  id: node?.id,
+            //  data: node?.data,
+            //  value: node?.value,
+            //  percentage: node?.percentage,
+            //  parentId: node?.parent?.id
+           // });
           } catch (e) {
             // ignore
           }

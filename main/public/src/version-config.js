@@ -1,6 +1,6 @@
 // Version configuration for global use
 const VERSION_CONFIG = {
-  version: "CS2 Alpha 2.80",
+  version: "CS2 Alpha 2.8.5",
   copyright: "AtomicRecall 2025"
 };
 

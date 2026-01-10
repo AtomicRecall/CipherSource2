@@ -10,11 +10,11 @@ export default function CreateMatchNavbar(
   seasonNumber: number,
   seasonDivision: string,
 ) {
-  console.log("vagina farts ", stats);
-  console.log("sub " + SelectedTeam);
-  console.log("WHATR THE FUCK ",seasonDivision);
-  console.log("WHJATASDFAS??? ",seasonNumber);
-  console.log("MOTYA FUCK YOU ",leagueInfo);
+ // console.log("vagina farts ", stats);
+  //console.log("sub " + SelectedTeam);
+  //console.log("WHATR THE FUCK ",seasonDivision);
+  //console.log("WHJATASDFAS??? ",seasonNumber);
+ // console.log("MOTYA FUCK YOU ",leagueInfo);
   const mappedSeasons = Array.isArray(stats)
     ? stats.map((match: any, index: number) => (
         <div key={`${match.matchData.rounds[0].match_id}`}>
@@ -53,7 +53,7 @@ export default function CreateMatchNavbar(
         >
           {(() => {
             const allData = Array.isArray(leagueInfo) ? leagueInfo.flat() : (leagueInfo || []);
-            console.log("ALL THE DATA ", allData);
+           // console.log("ALL THE DATA ", allData);
 
             const playoffData = allData.find((item: any) =>
               item.division_name === seasonDivision && item.stage_name === "Playoffs"

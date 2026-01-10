@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { Image } from "@heroui/react";
 import CalculateStats from "@/components/CalculateStatsForNavBar";
@@ -31,9 +31,9 @@ export function getImageForKey(round: string): string | null {
 }
 
 export default function AddSeasonToMenu(stats: any) {
-  console.log("Fart penis ", stats.stats.matchData);
-  console.log("OUR TEAM???", stats.SELECT);
-  console.log("FUCK BALLS ", stats);
+ // console.log("Fart penis ", stats.stats.matchData);
+ // console.log("OUR TEAM???", stats.SELECT);
+ // console.log("FUCK BALLS ", stats);
   let isBO3 = stats.stats.matchData.rounds.length > 1 ? true : false;
     const OpenMatchPage =
       (matchID: any) => (event: React.MouseEvent<HTMLParagraphElement>) => {
@@ -42,11 +42,11 @@ export default function AddSeasonToMenu(stats: any) {
         window.open("https://www.faceit.com/en/cs2/room/" + matchID+"/scoreboard");
         // Your custom logic here
       };
-  console.log("GET UP", parseInt(stats.stats.matchData.seasonNum));
+ // console.log("GET UP", parseInt(stats.stats.matchData.seasonNum));
 
   function returnImage(round: any) {
-    console.log("fuck balls fuck ", round);
-    console.log("god damnit piss balls ", stats.stats);
+    //console.log("fuck balls fuck ", round);
+   // console.log("god damnit piss balls ", stats.stats);
     const width = 250;
 
     //for(const map of stats.stats.PicksAndBans.payload.tickets[2].entities){
@@ -200,6 +200,8 @@ export default function AddSeasonToMenu(stats: any) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const [hovered, setHovered] = useState(false);
+  // use RAF to throttle pointermove updates and avoid re-render storm that can remount images
+  const rafRef = useRef<number | null>(null);
 
   function handleMouseEnter() {
     const rect = containerRef.current?.getBoundingClientRect() ?? null;
@@ -208,9 +210,36 @@ export default function AddSeasonToMenu(stats: any) {
   }
 
   function handleMouseMove() {
-    const rect = containerRef.current?.getBoundingClientRect() ?? null;
-    setAnchorRect(rect);
+    // Throttle updates using requestAnimationFrame to avoid re-rendering on every pointer move.
+    if (rafRef.current !== null) return;
+    rafRef.current = window.requestAnimationFrame(() => {
+      const rect = containerRef.current?.getBoundingClientRect() ?? null;
+      setAnchorRect((prevRect) => {
+        // Only update if rect actually changed to avoid unnecessary re-renders
+        if (
+          prevRect &&
+          rect &&
+          prevRect.top === rect.top &&
+          prevRect.left === rect.left &&
+          prevRect.width === rect.width &&
+          prevRect.height === rect.height
+        ) {
+          return prevRect;
+        }
+        return rect;
+      });
+      rafRef.current = null;
+    });
   }
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, []);
 
   function handleMouseLeave() {
     setHovered(false);
@@ -291,73 +320,80 @@ export default function AddSeasonToMenu(stats: any) {
       // also ensure we don't go above viewport top
       if (newTop < scrollY + 8) newTop = scrollY + 8;
 
+      // Only update when position changed by >= 1px to avoid frequent tiny updates that can remount children
+      if (Math.abs(newTop - pos.top) < 1 && Math.abs(initialLeft - pos.left) < 1) return;
+
       setPos({ top: newTop, left: initialLeft });
-    }, [anchorRect, entities]);
+    }, [anchorRect, entities, initialLeft, pos.top, pos.left]);
+
+    const renderedEntities = useMemo(() => {
+      return entities.map((e: any, idx: number) => {
+        const img = getImageForKey(e.guid) ?? "/images/DEFAULT.jpg";
+
+        // determine which team selected this (if available)
+        const selectedById = e.selected_by ?? e.selectedBy ?? null;
+        let selectedName: string | null = null;
+        let selectedAvatar: string | null = null;
+        try {
+          const t1 = stats?.stats?.teamMatchData?.teams?.faction1;
+          const t2 = stats?.stats?.teamMatchData?.teams?.faction2;
+          if (t1 && selectedById === t1.faction_id) {
+            selectedName = t1.name;
+            selectedAvatar = t1.avatar;
+          } else if (t2 && selectedById === t2.faction_id) {
+            selectedName = t2.name;
+            selectedAvatar = t2.avatar;
+          }
+        } catch (err) {
+          // ignore
+        }
+
+        const status = (e.status || "").toString().toLowerCase();
+        const isPick = status.includes("pick");
+        const isDrop = status.includes("ban") || status.includes("drop");
+
+        const containerClass = `flex items-center mb-2 p-1 rounded ${isPick ? "bg-[rgba(72,255,0,0.12)]" : isDrop ? "bg-[rgba(255,0,0,0.12)]" : ""}`;
+        const statusClass = isPick ? "text-green font-semibold" : isDrop ? "text-red font-semibold" : "font-semibold";
+
+        return (
+          <div className={containerClass} key={`pb-${idx}`}>
+            <img src={img} alt={e.guid} className="w-16 h-9 object-cover mr-2 rounded" onError={(ev)=>{(ev.currentTarget as HTMLImageElement).src='/images/DEFAULT.jpg'}} />
+            <div className="text-xs leading-tight flex-1">
+              <div className="flex justify-between items-center">
+                <div className={statusClass}>{(e.status || "").toUpperCase()}</div>
+                <div className="text-[11px] opacity-90">{(e.guid || "").replace("de_", "").toUpperCase()}</div>
+              </div>
+              {selectedName ? (
+                <div className="flex items-center mt-1">
+                  {(() => {
+                    const normalizedAvatar = selectedAvatar && selectedAvatar !== "" && selectedAvatar !== "undefined" ? selectedAvatar : "/images/DEFAULT.jpg";
+                    return (
+                      <img
+                        src={normalizedAvatar}
+                        onError={(ev) => {(ev.currentTarget as HTMLImageElement).src = "/images/DEFAULT.jpg"}}
+                        className="w-5 h-5 rounded-full mr-2"
+                      />
+                    );
+                  })()}
+                  <div className="text-[11px] opacity-90">{selectedName}</div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        );
+      });
+    }, [entities, stats]);
 
     return createPortal(
       <div
         ref={panelRef}
         data-picks-bans-panel
-        className="z-[9999] bg-black/80 text-white p-2 rounded shadow-lg font-play"
+        className="z-[9999] bg-black text-white p-2 rounded shadow-lg font-play"
         style={{ position: "absolute", top: `${pos.top}px`, left: `${pos.left}px`, width: 260 }}
       >
         <h3 className="font-bold text-sm mb-2">Picks & Bans</h3>
         <div>
-          {entities.map((e: any, idx: number) => {
-            const img = getImageForKey(e.guid) ?? "/images/DEFAULT.jpg";
-
-            // determine which team selected this (if available)
-            const selectedById = e.selected_by ?? e.selectedBy ?? null;
-            let selectedName: string | null = null;
-            let selectedAvatar: string | null = null;
-            try {
-              const t1 = stats?.stats?.teamMatchData?.teams?.faction1;
-              const t2 = stats?.stats?.teamMatchData?.teams?.faction2;
-              if (t1 && selectedById === t1.faction_id) {
-                selectedName = t1.name;
-                selectedAvatar = t1.avatar;
-              } else if (t2 && selectedById === t2.faction_id) {
-                selectedName = t2.name;
-                selectedAvatar = t2.avatar;
-              }
-            } catch (err) {
-              // ignore
-            }
-
-            const status = (e.status || "").toString().toLowerCase();
-            const isPick = status.includes("pick");
-            const isDrop = status.includes("ban") || status.includes("drop");
-
-            const containerClass = `flex items-center mb-2 p-1 rounded ${isPick ? "bg-[rgba(72,255,0,0.12)]" : isDrop ? "bg-[rgba(255,0,0,0.12)]" : ""}`;
-            const statusClass = isPick ? "text-green font-semibold" : isDrop ? "text-red font-semibold" : "font-semibold";
-
-            return (
-              <div className={containerClass} key={`pb-${idx}`}>
-                <img src={img} alt={e.guid} className="w-16 h-9 object-cover mr-2 rounded" onError={(ev)=>{(ev.currentTarget as HTMLImageElement).src='/images/DEFAULT.jpg'}} />
-                <div className="text-xs leading-tight flex-1">
-                  <div className="flex justify-between items-center">
-                    <div className={statusClass}>{(e.status || "").toUpperCase()}</div>
-                    <div className="text-[11px] opacity-90">{(e.guid || "").replace("de_", "").toUpperCase()}</div>
-                  </div>
-                  {selectedName ? (
-                    <div className="flex items-center mt-1">
-                      {(() => {
-                        const normalizedAvatar = selectedAvatar && selectedAvatar !== "" && selectedAvatar !== "undefined" ? selectedAvatar : "/images/DEFAULT.jpg";
-                        return (
-                          <img
-                            src={normalizedAvatar}
-                            onError={(ev) => {(ev.currentTarget as HTMLImageElement).src = "/images/DEFAULT.jpg"}}
-                            className="w-5 h-5 rounded-full mr-2"
-                          />
-                        );
-                      })()}
-                      <div className="text-[11px] opacity-90">{selectedName}</div>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
+          {renderedEntities}
         </div>
       </div>,
       document.body,
@@ -379,8 +415,25 @@ export default function AddSeasonToMenu(stats: any) {
 
       const insideAnchor = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
       if (insideAnchor) {
-        // update anchor rect while moving inside
-        setAnchorRect(containerRef.current?.getBoundingClientRect() ?? null);
+        // Throttle updates while pointer moves inside the anchor to avoid frequent re-renders
+        if (rafRef.current !== null) return;
+        rafRef.current = window.requestAnimationFrame(() => {
+          const newRect = containerRef.current?.getBoundingClientRect() ?? null;
+          setAnchorRect((prevRect) => {
+            if (
+              prevRect &&
+              newRect &&
+              prevRect.top === newRect.top &&
+              prevRect.left === newRect.left &&
+              prevRect.width === newRect.width &&
+              prevRect.height === newRect.height
+            ) {
+              return prevRect;
+            }
+            return newRect;
+          });
+          rafRef.current = null;
+        });
         return;
       }
 

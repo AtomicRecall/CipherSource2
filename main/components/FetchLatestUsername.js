@@ -10,7 +10,7 @@ export default async function fetchLatestUsername(playerId) {
   
       if (!resPlayer.ok) throw new Error("Failed to fetch player info");
       const PlayerData = await resPlayer.json();
-      console.log("GET YOUR BOOTYHOLE DOWN: ",PlayerData);
+      //console.log("GET YOUR BOOTYHOLE DOWN: ",PlayerData);
       const playerInfo = {
         nickname: PlayerData.nickname,
         avatar: PlayerData.avatar
