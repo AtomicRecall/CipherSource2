@@ -22,7 +22,7 @@
     "@heroui/snippet": "2.2.25",
     "@heroui/switch": "2.2.22",
     "@heroui/system": "2.4.20",
-    "@heroui/theme": "2.4.20",
+    "@heroui/theme": "^2.4.23",
     "@nivo/bar": "^0.99.0",
     "@nivo/core": "^0.99.0",
     "@nivo/icicle": "^0.99.0",
