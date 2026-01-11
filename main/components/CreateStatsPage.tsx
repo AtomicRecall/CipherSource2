@@ -123,6 +123,7 @@ export function resetGlobalArrays() {
   Banned = [];
   Picks = [];
   FirstBan = [];
+
   SecondBan = [];
   ThirdBan = [];
   BO3Picked = [];
@@ -135,6 +136,8 @@ export function resetGlobalArrays() {
   bo1FirstBan = [];
   bo1FirstBanTeamA = [];
   bo1FirstBanTeamB = [];
+   bo3FirstBanTeamA = [];
+  bo3FirstBanTeamB = [];
   bo1SecondBan = [];
   bo1ThirdBan = [];
   bo1Pick = [];
@@ -184,6 +187,8 @@ let Banned: MapStats[] = [];
 let Picks: MapStats[] = [];
 let LeftOverPick: MapStats[] = [];
 let FirstBan: MapStats[] = [];
+let FirstBanTeamA: MapStats[] = [];
+let FirstBanTeamB: MapStats[] = [];
 let SecondBan: MapStats[] = [];
 let ThirdBan: MapStats[] = [];
 let BO3Picked: MapStats[] = [];
@@ -197,6 +202,8 @@ let bo1Banned: MapStats[] = [];
 let bo1FirstBan: MapStats[] = [];
 let bo1FirstBanTeamA: MapStats[] = [];
 let bo1FirstBanTeamB: MapStats[] = [];
+let bo3FirstBanTeamA: MapStats[] = [];
+let bo3FirstBanTeamB: MapStats[] = [];
 let bo1SecondBan: MapStats[] = [];
 let bo1ThirdBan: MapStats[] = [];
 let bo1Pick: MapStats[] = [];
@@ -222,6 +229,8 @@ function CreateStatsPage({
   Picks = [];
   LeftOverPick = [];
   FirstBan = [];
+  FirstBanTeamA = [];
+  FirstBanTeamB = [];
   SecondBan = [];
   ThirdBan = [];
   BO3Picked = [];
@@ -234,6 +243,8 @@ function CreateStatsPage({
   bo1FirstBan = [];
   bo1FirstBanTeamA = [];
   bo1FirstBanTeamB = [];
+  bo3FirstBanTeamA = [];
+  bo3FirstBanTeamB = [];
   bo1SecondBan = [];
   bo1ThirdBan = [];
   bo1Pick = [];
@@ -385,6 +396,17 @@ function CreateStatsPage({
                 } else {
                   bo1FirstBanTeamA.push({ map_name: eachPickOrBan.guid, count: 1 });
                 }
+
+                const mapObj2 = FirstBanTeamA.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
+
+                if (mapObj2) {
+                  mapObj2.count += 1;
+                } else {
+                  FirstBanTeamA.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+                
               }
               else if(numBanThisGame == 2){
                 const mapObj1 = bo1FirstBanTeamB.find(
@@ -395,6 +417,16 @@ function CreateStatsPage({
                   mapObj1.count += 1;
                 } else {
                   bo1FirstBanTeamB.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+
+                const mapObj2 = FirstBanTeamB.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
+
+                if (mapObj2) {
+                  mapObj2.count += 1;
+                } else {
+                  FirstBanTeamB.push({ map_name: eachPickOrBan.guid, count: 1 });
                 }
               }
               const mapObj1 = FirstBan.find(
@@ -548,6 +580,8 @@ function CreateStatsPage({
     const bo1FirstBanData = [];
     const bo1FirstBanTeamAData = [];
     const bo1FirstBanTeamBData = [];
+    const bo3FirstBanTeamAData = [];
+    const bo3FirstBanTeamBData = [];
     const bo1SecondBanData = [];
     const bo1ThirdBanData = [];
     const bo1PickData = [];
@@ -679,10 +713,10 @@ function CreateStatsPage({
                 break;
             }
           }
-          } else if (
-            eachPickOrBan.selected_by == SelectedTeam &&
-            eachPickOrBan.status == "drop"
-          ) {
+          } else if (eachPickOrBan.status == "drop") {
+            numBanThisGame++;
+          if(eachPickOrBan.selected_by == SelectedTeam)
+          {
             numBan++;
             // Always update Banned
             const mapObj1 = Banned.find(
@@ -705,26 +739,66 @@ function CreateStatsPage({
             }
             switch (numBan) {
               case 1:
-                const mapObj = bo3FirstBan.find(
-                  (obj) => obj.map_name === eachPickOrBan.guid,
-                );
-
-                if (mapObj) {
-                  mapObj.count += 1;
-                } else {
-                  bo3FirstBan.push({ map_name: eachPickOrBan.guid, count: 1 });
-                }
-                
-                const mapObj1 = FirstBan.find(
+                if(numBanThisGame == 1){
+                  
+                const mapObj1 = bo3FirstBanTeamA.find(
                   (obj) => obj.map_name == eachPickOrBan.guid,
                 );
 
                 if (mapObj1) {
                   mapObj1.count += 1;
                 } else {
-                  FirstBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+                  bo3FirstBanTeamA.push({ map_name: eachPickOrBan.guid, count: 1 });
                 }
+                  const mapObj2 = FirstBanTeamA.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
 
+                if (mapObj2) {
+                  mapObj2.count += 1;
+                } else {
+                  FirstBanTeamA.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+              }
+              else if(numBanThisGame == 2){
+                
+                const mapObj1 = bo3FirstBanTeamB.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
+
+                if (mapObj1) {
+                  mapObj1.count += 1;
+                } else {
+                  bo3FirstBanTeamB.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+                  const mapObj2 = FirstBanTeamB.find(
+                  (obj) => obj.map_name == eachPickOrBan.guid,
+                );
+
+                if (mapObj2) {
+                  mapObj2.count += 1;
+                } else {
+                  FirstBanTeamB.push({ map_name: eachPickOrBan.guid, count: 1 });
+                }
+              }
+              const mapObj1 = FirstBan.find(
+                (obj) => obj.map_name == eachPickOrBan.guid,
+              );
+
+              if (mapObj1) {
+                mapObj1.count += 1;
+              } else {
+                FirstBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+              }
+              const mapObj = bo3FirstBan.find(
+                (obj) => obj.map_name === eachPickOrBan.guid,
+              );
+
+              if (mapObj) {
+                mapObj.count += 1;
+              } else {
+                bo3FirstBan.push({ map_name: eachPickOrBan.guid, count: 1 });
+              }
                 break;
               case 2:
                 const secondObject = bo3SecondBan.find(
@@ -751,6 +825,7 @@ function CreateStatsPage({
                 break;
             }
           }
+        }
         }
       }
       
@@ -790,6 +865,38 @@ function CreateStatsPage({
       }
       for (const map of bo1FirstBanTeamB) {
         bo1FirstBanTeamBData.push({
+          id: `${map.map_name}`,
+          label: `${map.map_name}`,
+          value: `${map.count}`,
+          color: whatColor(map.map_name),
+        });
+      }
+      for (const map of FirstBanTeamB) {
+        FirstBanTeamBData.push({
+          id: `${map.map_name}`,
+          label: `${map.map_name}`,
+          value: `${map.count}`,
+          color: whatColor(map.map_name),
+        });
+      }
+      for (const map of FirstBanTeamA) {
+        FirstBanTeamAData.push({
+          id: `${map.map_name}`,
+          label: `${map.map_name}`,
+          value: `${map.count}`,
+          color: whatColor(map.map_name),
+        });
+      }
+      for (const map of bo3FirstBanTeamA) {
+        bo3FirstBanTeamAData.push({
+          id: `${map.map_name}`,
+          label: `${map.map_name}`,
+          value: `${map.count}`,
+          color: whatColor(map.map_name),
+        });
+      }
+      for (const map of bo3FirstBanTeamB) {
+        bo3FirstBanTeamBData.push({
           id: `${map.map_name}`,
           label: `${map.map_name}`,
           value: `${map.count}`,
@@ -1025,9 +1132,9 @@ function CreateStatsPage({
                             firstBanData={FirstBan}
                             secondBanData={SecondBan}
                             thirdBanData={ThirdBan}
-                            bo1FirstBanTeamAData={bo1FirstBanTeamA}
-                            bo1FirstBanTeamBData={bo1FirstBanTeamB}
-                            resetZoomRef={bo1ResetZoomRef}
+                            bo1FirstBanTeamAData={FirstBanTeamA}
+                            bo1FirstBanTeamBData={FirstBanTeamB}
+                            resetZoomRef={undefined}
                             type={"bans"}
                             season={55}
                           />
@@ -1114,19 +1221,17 @@ function CreateStatsPage({
             <Card className="p-4 border rounded-lg bg-cumground overflow-hidden">
               <p className="text-[50px] -mt-5 font-bold text-gray-100 absolute">BO3:</p>
               <div className="flex-row gap-4 overflow-hidden">
-                {/* BO3 Bar Chart Section */}
-                <div className="w-full mx-auto -ml-5">
-                  <div className="flex p-4 mt-8 ">
-                    {/* Bar Chart Section */}
-                    <div className="flex-1 overflow-hidden">
+                {/* BO1 Bar Chart and Picks Section */}
+               <div className="flex flex-wrap  mt-8">
+                 {/* Bar Chart Section */}
+                 <div className="flex-1 overflow-hidden">
                    <div className="p-4 rounded-lg">
-                     <div className="bg-cumground rounded-lg ">
+                     <div className="bg-cumground rounded-lg -mx-4">
                        <MyBarCanvas data={transformMapsDataForBarChart(bo3Played, bo3Won, bo3Lost)} />
                      </div>
                    </div>
                  </div>
-                  </div>
-                </div>
+              </div>
 
               {/* Icicle Graph Section for BO3 Bans */}
               {bo3FirstPickData.length > 0 && (
@@ -1159,6 +1264,8 @@ function CreateStatsPage({
                           firstBanData={bo3FirstBan}
                           secondBanData={bo3SecondBan}
                           thirdBanData={[]} // BO3 typically only has first and second bans
+                          bo1FirstBanTeamAData={bo3FirstBanTeamA}
+                          bo1FirstBanTeamBData={bo3FirstBanTeamB}
                           type={"bans"}
                           season={55}
                         />
