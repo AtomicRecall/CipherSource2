@@ -1120,7 +1120,7 @@ function CreateStatsPage({
                     {/* Bar Chart Section */}
                     <div className="flex-1 overflow-hidden">
                    <div className="p-4 rounded-lg">
-                     <div className="bg-cumground rounded-lg -mx-4">
+                     <div className="bg-cumground rounded-lg ">
                        <MyBarCanvas data={transformMapsDataForBarChart(bo3Played, bo3Won, bo3Lost)} />
                      </div>
                    </div>
