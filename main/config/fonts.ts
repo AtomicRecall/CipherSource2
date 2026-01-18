@@ -1,7 +1,4 @@
-import {
-  Play as FontPlay,
-} from "next/font/google";
-
+import { Play as FontPlay } from "next/font/google";
 
 export const fontPlay = FontPlay({
   subsets: ["latin"],

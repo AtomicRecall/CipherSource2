@@ -3,10 +3,10 @@ import { Card, Skeleton } from "@heroui/react";
 
 export default function RosterSkeleton() {
   return (
-    <Card className="flex-row gap-3 items-center border rounded-lg bg-cumground mt-1 -ml-1 flex-shrink-0 min-w-max mr-2">
+    <Card className="flex-row gap-3 items-center border rounded-lg bg-cumground mt-1 -ml-1 flex-shrink-0 mr-2">
       {/* Season logo skeleton */}
       <Skeleton className="w-10 h-10 rounded-full ml-2 mb-11" />
-      
+
       {/* Player avatars and names skeleton */}
       <div className="flex flex-row gap-2">
         {/* Main players (larger avatars) */}

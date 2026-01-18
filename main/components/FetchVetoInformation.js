@@ -54,9 +54,9 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
       }
 
 
-      if(amtOfPicks == 1){
+      
         stats.PicksAndBans["payload"].tickets[2].entities[stats.PicksAndBans["payload"].tickets[2].entities.length-1].selected_by = stats.PicksAndBans["payload"].tickets[2].entities[stats.PicksAndBans["payload"].tickets[2].entities.length-2].selected_by
-      }
+      
       Stats.push(stats);
       }
       

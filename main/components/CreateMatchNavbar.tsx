@@ -10,11 +10,11 @@ export default function CreateMatchNavbar(
   seasonNumber: number,
   seasonDivision: string,
 ) {
- // console.log("vagina farts ", stats);
+  // console.log("vagina farts ", stats);
   //console.log("sub " + SelectedTeam);
   //console.log("WHATR THE FUCK ",seasonDivision);
   //console.log("WHJATASDFAS??? ",seasonNumber);
- // console.log("MOTYA FUCK YOU ",leagueInfo);
+  // console.log("MOTYA FUCK YOU ",leagueInfo);
   const mappedSeasons = Array.isArray(stats)
     ? stats.map((match: any, index: number) => (
         <div key={`${match.matchData.rounds[0].match_id}`}>
@@ -45,62 +45,73 @@ export default function CreateMatchNavbar(
     <Card className="p-4 border rounded-lg bg-cumground flex w-70 flex-shrink-0">
       <div className="flex flex-col">
         <div className="flex items-center">
-        <GetAndReturnESEALOGO Data={seasonNumber} />
-        <h1
-          className="text-md text-white ml-2"
-          id="DivName"
-          style={{ whiteSpace: "pre-line" }}
-        >
-          {(() => {
-            const allData = Array.isArray(leagueInfo) ? leagueInfo.flat() : (leagueInfo || []);
-           // console.log("ALL THE DATA ", allData);
+          <GetAndReturnESEALOGO Data={seasonNumber} />
+          <h1
+            className="text-md text-white ml-2"
+            id="DivName"
+            style={{ whiteSpace: "pre-line" }}
+          >
+            {(() => {
+              const allData = Array.isArray(leagueInfo)
+                ? leagueInfo.flat()
+                : leagueInfo || [];
+              // console.log("ALL THE DATA ", allData);
 
-            const playoffData = allData.find((item: any) =>
-              item.division_name === seasonDivision && item.stage_name === "Playoffs"
-            );
-
-            const regularData = allData.find((item: any) =>
-              item.division_name === seasonDivision && (item.stage_name === "Regular Season" || item.stage_name === "Group Stage")
-            ) || allData.find((item: any) => item.division_name === seasonDivision);
-
-            const wins = (regularData && regularData.wins) ?? 0;
-            const losses = (regularData && regularData.losses) ?? 0;
-
-            if (playoffData) {
-              const poWins = playoffData.wins ?? 0;
-              const poLosses = playoffData.losses ?? 0;
-              return (
-                <>
-                  {`S${seasonNumber} ${seasonDivision}: (`}
-                  <span className="text-green-400">{wins}</span>
-                  {` / `}
-                  <span className="text-red-400">{losses}</span>
-                  {`) \nPO: (`}
-                  <span className="text-green-400">{poWins}</span>
-                  {` / `}
-                  <span className="text-red-400">{poLosses}</span>
-                  {`)`}
-                </>
+              const playoffData = allData.find(
+                (item: any) =>
+                  item.division_name === seasonDivision &&
+                  item.stage_name === "Playoffs",
               );
-            }
 
-            if (regularData) {
-              return (
-                <>
-                  {`S${seasonNumber} ${seasonDivision}: (`}
-                  <span className="text-green-400">{wins}</span>
-                  {` / `}
-                  <span className="text-red-400">{losses}</span>
-                  {`)`}
-                </>
-              );
-            }
+              const regularData =
+                allData.find(
+                  (item: any) =>
+                    item.division_name === seasonDivision &&
+                    (item.stage_name === "Regular Season" ||
+                      item.stage_name === "Group Stage"),
+                ) ||
+                allData.find(
+                  (item: any) => item.division_name === seasonDivision,
+                );
 
-            return `S${seasonNumber} ${seasonDivision}: No data available!`;
-          })()}
+              const wins = (regularData && regularData.wins) ?? 0;
+              const losses = (regularData && regularData.losses) ?? 0;
 
-        </h1>
-      </div>
+              if (playoffData) {
+                const poWins = playoffData.wins ?? 0;
+                const poLosses = playoffData.losses ?? 0;
+
+                return (
+                  <>
+                    {`S${seasonNumber} ${seasonDivision}: (`}
+                    <span className="text-green-400">{wins}</span>
+                    {` / `}
+                    <span className="text-red-400">{losses}</span>
+                    {`) \nPO: (`}
+                    <span className="text-green-400">{poWins}</span>
+                    {` / `}
+                    <span className="text-red-400">{poLosses}</span>
+                    {`)`}
+                  </>
+                );
+              }
+
+              if (regularData) {
+                return (
+                  <>
+                    {`S${seasonNumber} ${seasonDivision}: (`}
+                    <span className="text-green-400">{wins}</span>
+                    {` / `}
+                    <span className="text-red-400">{losses}</span>
+                    {`)`}
+                  </>
+                );
+              }
+
+              return `S${seasonNumber} ${seasonDivision}: No data available!`;
+            })()}
+          </h1>
+        </div>
         {mappedSeasons}
       </div>
     </Card>
