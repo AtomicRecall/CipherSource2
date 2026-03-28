@@ -5,7 +5,7 @@ export async function GET(req: Request) {
   const error = url.searchParams.get("error");
 
   if (error || !code) {
-    return Response.redirect(`${process.env.BASE_URL}/home.html`);
+    return Response.redirect(`https://cipher.onl/home.html`);
   }
 
   try {
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     const tokenData = await tokenRes.json();
 
     if (!tokenData.access_token) {
-      return Response.redirect(`${process.env.BASE_URL}/home.html`);
+      return Response.redirect(`https://cipher.onl/home.html`);
     }
 
     // Fetch FACEIT profile
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
     const profile = await profileRes.json();
 
     // Store in cookie
-    const res = Response.redirect(`${process.env.BASE_URL}/home.html`);
+    const res = Response.redirect(`https://cipher.onl/home.html`);
 
     res.headers.set(
       "Set-Cookie",
@@ -57,6 +57,6 @@ export async function GET(req: Request) {
 
     return res;
   } catch (err) {
-    return Response.redirect(`${process.env.BASE_URL}/home.html`);
+    return Response.redirect(`https://cipher.onl/home.html`);
   }
 }
