@@ -20,9 +20,9 @@ export async function GET(req: Request) {
         body: new URLSearchParams({
           grant_type: "authorization_code",
           code,
-          client_id: "91174f46-9961-45a0-92ea-7e164eaf43e8",
-          client_secret: "rlOrpt2FL0ghcp2tJ24UzK53AnEoSe8VOBPYkk2h",
-          redirect_uri: `https://localhost:3000/api/auth/faceit/callback`,
+          client_id: "fc47747f-a252-4e38-b3be-028626a8a06e",
+          client_secret: "wIVJZ74QTGEPSvdvPkVWr0P0r4vj8t2zZdUzaUZg",
+          redirect_uri: `https://cipher.onl/api/auth/faceit/callback`,
         }),
       }
     );

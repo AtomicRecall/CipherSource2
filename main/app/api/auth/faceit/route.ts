@@ -1,7 +1,7 @@
 export async function GET() {
   const params = new URLSearchParams({
-    client_id: "91174f46-9961-45a0-92ea-7e164eaf43e8",
-    redirect_uri: `https://localhost:3000/api/auth/faceit/callback`,
+    client_id: "fc47747f-a252-4e38-b3be-028626a8a06e",
+    redirect_uri: `https://cipher.onl/api/auth/faceit/callback`,
     response_type: "code",
     scope: "openid profile",
   });
