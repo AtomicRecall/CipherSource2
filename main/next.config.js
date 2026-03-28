@@ -16,6 +16,10 @@ const nextConfig = {
                 source: '/search',
                 destination: '/search.html',
             },
+            {
+                source: '/top20',
+                destination:"/top20.html",
+            },
         ];
     },
     // Server-side redirects: map path-style /search/<slug> to query-style /search?<slug>

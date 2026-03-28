@@ -12,20 +12,16 @@ export default function Error({
   useEffect(() => {
     // Log the error to an error reporting service
 
-    console.error(error);
+    console.error("OG MFSDJKFSD ",error);
   }, [error]);
 
   return (
     <div>
-      <h2>Something went wrong!</h2>
-      <button
-        onClick={
-          // Attempt to recover by trying to re-render the segment
-          () => reset()
-        }
-      >
-        Try again
-      </button>
+      <h2> Something went wrong!</h2>
+      ({error.message}) from {error.stack?.substring(0,error.stack.indexOf("@"))}. Open up the console (F12) for more information.
+      <div> Send what you see here and in console to: atomic#5689 on discord and he will most likely fix that shit.</div>
+      
+      <div> </div>
     </div>
   );
 }

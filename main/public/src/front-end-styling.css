@@ -15,6 +15,7 @@
 html,
 body {
   height: 100%;
+   zoom: 1.00;
 }
 body {
   margin: 0;
@@ -324,7 +325,8 @@ h2{
   width: 100%;
   transition: opacity 0.3s ease-in;
   filter: drop-shadow(2px 1px 2px #000000);
-  transform: translateY(73%);
+  transform: translateY(50%);
+  z-index:11;
   
 }
 
@@ -600,4 +602,95 @@ h3{
 }
 #fart span:nth-child(4) {
   transform: rotateX(90deg) translateZ(25px);
+}
+
+/* SSO overlay styles */
+.sso-overlay {
+  position: absolute;
+  z-index: 10000;
+  width: 90%;
+  max-width: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  
+}
+.faceit-sso{
+  border-radius: 5px;
+  filter: drop-shadow(5px 5px 10px rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+.faceit-sso:hover{
+  transition: .5s;
+  filter: drop-shadow(1px 1px 2px #FF6900);
+}
+
+.sso-overlay .sso-card {
+  background: #232828;
+  border-bottom-right-radius: 20%;
+  color: #fff;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  width: 100%;
+  text-align: center;
+  position: relative;
+  
+}
+.sso-close {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  color: #fff;
+  cursor: pointer;
+}
+.sso-button {
+  background: #FF6900;
+  color: #000;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.sso-button:hover { filter: drop-shadow(1px 1px 2px #fff); }
+.remember { margin-top: 12px; color: #ccc; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; }
+.remember input{ margin-right: 8px; transform: scale(1.15); }
+.sso-desc{
+  margin-top: -50px;
+}
+#faceitname {
+  position: relative;
+  top:-50px;
+  color: black;
+  /* Initial shadow and animation properties */
+  animation: pulse-shadow 5s infinite;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+@keyframes pulse-shadow {
+  0% {
+    filter: drop-shadow(0 0 10px var(--pulse-color, #FF6900));
+  }
+  70% {
+    filter: drop-shadow(0 0 0px rgba(52, 152, 219, 0)); /* Shadow spreads out and fades */
+  }
+  100% {
+    filter: drop-shadow(0 0 10px var(--pulse-color, #FF6900));
+  }
+}
+
+/* Fallback default variable on the element itself is optional; the animation uses the var() default so no extra rules required. */
+
+#useSteam{
+  cursor: pointer;
+  transition: .5s;
+}
+#useSteam:hover{
+  filter: drop-shadow(1px 1px 2px rgba(11, 130, 180));
 }

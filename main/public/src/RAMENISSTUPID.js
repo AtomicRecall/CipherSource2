@@ -1,3 +1,74 @@
+const useSteamEl = document.getElementById("useSteam");
+if (useSteamEl) {
+  useSteamEl.addEventListener('click', (event) => {
+    const steamCheckbox = document.getElementById("steam");
+    if (!steamCheckbox) return;
+    // If the click came from the checkbox itself or its label, let the browser handle it
+    const clickedInputOrLabel = event.target === steamCheckbox || event.target.closest('label[for="steam"]') || steamCheckbox.contains(event.target);
+    if (clickedInputOrLabel) return;
+    // Simulate a user click so the browser dispatches the proper change event and accessibility events
+    steamCheckbox.click();
+  });
+}
+/*
+async function faceitButtonClick() {
+    try {
+      const response = await FACEIT.loginWithFaceit();
+      console.log("FACEIT login response:", response);
+    } catch (err) {
+      console.error("FACEIT login failed:", err);
+    }
+  };
+  
+  */
+const faceitLoginEl = document.getElementById("faceitLogin");
+if (faceitLoginEl) {
+  faceitLoginEl.onclick = null; /*faceitButtonClick; */
+}
+const steamlLoginEl = document.getElementById("steam");
+if(steamlLoginEl){
+  steamlLoginEl.addEventListener('change', (event) => {
+    const isChecked = event.target.checked;
+    console.log("Steam checkbox changed:", isChecked);
+    const faceitNameEl = document.getElementById('faceitname');
+          document.getElementById("faceitLogin").onmouseout = function() {
+        document.getElementById("faceitLogin").style.transition = "filter 0.5s ease";
+        document.getElementById("faceitLogin").style.filter = "drop-shadow(1px 1px 2px rgba(11, 129, 180, 0))";
+      };
+    if (isChecked) {
+      if (faceitNameEl) {
+        faceitNameEl.innerHTML = '<image id="steamlogoo" src="images/steamlogo.png" style="height: 30px; position: relative; top: 5px;"></image> Steam';
+        // set CSS variable to steam color
+        faceitNameEl.style.setProperty('--pulse-color', 'rgba(11, 130, 180, 1)');
+        console.log('Applied steam pulse color to #faceitname');
+      }
+      document.getElementById("sso-desc").innerText = "When you log in using steam, we will use your steam id to find your faceit profile. If you are actively playing in ESEA League, you will be able to access the picks and bans of your upcoming matches in ESEA League AUTOMATICALLY.";
+      document.getElementById("faceitLogin").src = "images/loginwithsteam.png";
+      document.getElementById("faceitLogin").onmouseover = function() {
+        document.getElementById("faceitLogin").style.transition = "filter 0.5s ease";
+        document.getElementById("faceitLogin").style.filter = "drop-shadow(1px 1px 2px rgba(11, 130, 180, 1))";
+      };
+      document.getElementById("faceitLogin").onclick = function() {
+        console.log("LOGIN WITH STEAM LOL");
+      };
+    } 
+    else {
+      if (faceitNameEl) {
+        faceitNameEl.innerHTML = '<image id="faceitlogoo" src="images/FACEIT.png" style="height: 30px"></image> FACEIT';
+        // reset to default colour
+        faceitNameEl.style.setProperty('--pulse-color', '#FF6900');
+        console.log('Reverted pulse color on #faceitname');
+      }
+      document.getElementById("sso-desc").innerText = "When you log in, we will use your faceit profile name to find if you are actively playing in ESEA League, if you are, you will be able to access the picks and bans of your upcoming matches in ESEA League AUTOMATICALLY.";
+      document.getElementById("faceitLogin").src = "images/LOGINWITHFACEIT.png";
+      document.getElementById("faceitLogin").onmouseover = function() {
+        document.getElementById("faceitLogin").style.transition = "filter 0.5s ease";
+        document.getElementById("faceitLogin").style.filter = "drop-shadow(1px 1px 2px #FF6900)";
+      };
+      document.getElementById("faceitLogin").onclick = null;//faceitButtonClick;
+    } 
+});
+}
 function showTypesOfInputs(){
     try {
         // Avoid duplicate overlays
@@ -21,7 +92,7 @@ function showTypesOfInputs(){
         overlay.style.textAlign = 'left';
 
     const text = document.createElement('div');
-    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>- FACEIT Match ID<br>- Direct Match URL';        
+    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>- FACEIT Match ID<br>- Match URL';        
         text.style.textAlign = 'left';
         overlay.appendChild(text);
 
@@ -202,6 +273,81 @@ window.onload = () => {
         }
   });
     });
+
+  // --- SSO overlay helpers: shows/hides the sign-in card when the .menu/.hamb is clicked ---
+  function showSSOOverlay() {
+    try {
+      const overlay = document.getElementById('sso-overlay');
+      if (!overlay) return;
+      if (overlay.classList.contains('sso-overlay-active')) return;
+      overlay.style.display = 'flex';
+      overlay.classList.add('sso-overlay-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.getElementById('menuButton').style.transition = 'opacity 300ms ease';
+      document.getElementById('menuButton').style.opacity = 0;
+      
+      const checkbox = document.getElementById('remember-me');
+      if (checkbox && localStorage.getItem('rememberMe') === 'true') checkbox.checked = true;
+      const faceit = document.getElementById('faceit-sso');
+      if (faceit) faceit.focus();
+    } catch (e) { console.error('showSSOOverlay error', e); }
+  }
+  function hideSSOOverlay() {
+    try {
+      const overlay = document.getElementById('sso-overlay');
+      if (!overlay) return;
+      overlay.style.display = 'none';
+      overlay.classList.remove('sso-overlay-active');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.getElementById('menuButton').style.opacity = 1;
+    } catch (e) { console.error('hideSSOOverlay error', e); }
+  }
+
+  // Toggle when menu / hamb is clicked
+  const $menuBtn = document.querySelector('.menu');
+  if ($menuBtn) {
+    $menuBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const overlay = document.getElementById('sso-overlay');
+      if (!overlay) return;
+      if (overlay.style.display === 'flex') hideSSOOverlay(); else showSSOOverlay();
+    });
+  }
+
+  // Close when clicking outside the card
+  const ssoOverlayEl = document.getElementById('sso-overlay');
+  if (ssoOverlayEl) {
+    ssoOverlayEl.addEventListener('click', (e) => { if (e.target === ssoOverlayEl) hideSSOOverlay(); });
+  }
+
+  // Close button
+  const ssoClose = document.querySelector('.sso-close');
+  if (ssoClose) ssoClose.addEventListener('click', hideSSOOverlay);
+
+  // FACEIT SSO button (placeholder)
+  const faceitBtn = document.getElementById('faceit-sso');
+  if (faceitBtn) {
+    faceitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Replace this with a real OAuth redirect when backend is ready
+
+      const remember = document.getElementById('remember-me');
+      if (remember && remember.checked) localStorage.setItem('rememberMe', 'true');
+      else localStorage.removeItem('rememberMe');
+    });
+  }
+
+  const rememberCheckbox = document.getElementById('remember-me');
+  if (rememberCheckbox) {
+    rememberCheckbox.addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      if (checked) localStorage.setItem('rememberMe', 'true'); else localStorage.removeItem('rememberMe');
+    });
+  }
+
+  // Close overlay on Escape
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') hideSSOOverlay(); });
+
   const headers = [
     "After nine years in development,",
     "Hopefully It would've been worth the wait.",

@@ -29,7 +29,7 @@ interface PlayerStats {
   latest_player_name: string;
   count: number;
 }
-let thisSeason = 55;
+let thisSeason = 56;
 const SEASON_LOGO_STANDARD = 30;
 const SEASON_LOGO_SMALL = 23;
 
@@ -359,6 +359,7 @@ export default function CreateTeamProfile() {
 
       // Try configured thisSeason first; if it has no results, fall back to thisSeason - 1
       const primary = Number(thisSeason);
+      console.log("THIS IS THE DATA :) = ",data);
       const seasonObj = data.leagues[0].league_seasons_info.find(
         (s: any) => Number(s.season_number) === Number(primary),
       );

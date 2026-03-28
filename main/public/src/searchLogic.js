@@ -91,7 +91,7 @@ window.ClickSearch = async function ClickSearch(input){
                 console.error('Error fetching data:', error);
             });
         }
-    if (!extractedId) {
+    else if (!extractedId) {
         
         
         await fetch(`https://open.faceit.com/data/v4/search/teams?nickname=${encodeURIComponent(input)}&game=cs2`,{
@@ -157,6 +157,7 @@ window.ClickSearch = async function ClickSearch(input){
             return response.json();
         })
         .then(data =>{
+            console.log("WE GOT THE DATA MUTHER FUCKERS!!!",data);
             if (data.members.length < 5){
                 return;
             }
@@ -293,10 +294,12 @@ window.ClickSearch = async function ClickSearch(input){
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
+                    //somehow cancel this whole function and dont print anything to that box from here.
                 }
                 return response.json();
             })
             .then(data => {
+                console.log("THE NEW MUTHER FUCKING DATA ", data);
                 // Carousel wrapper
                 let carouselWrapper = document.createElement("div");
                 carouselWrapper.classList.add("carousel-wrapper");

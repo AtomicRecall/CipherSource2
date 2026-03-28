@@ -18,7 +18,79 @@ document.getElementById("searchText").addEventListener('keydown', (event) => {
     }
   }
 });
+// --- SSO overlay helpers: shows/hides the sign-in card when the .menu/.hamb is clicked ---
+  function showSSOOverlay() {
+    try {
+      const overlay = document.getElementById('sso-overlay');
+      if (!overlay) return;
+      if (overlay.classList.contains('sso-overlay-active')) return;
+      overlay.style.display = 'flex';
+      overlay.classList.add('sso-overlay-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.getElementById('menuButton').style.transition = 'opacity 300ms ease';
+      document.getElementById('menuButton').style.opacity = 0;
+      
+      const checkbox = document.getElementById('remember-me');
+      if (checkbox && localStorage.getItem('rememberMe') === 'true') checkbox.checked = true;
+      const faceit = document.getElementById('faceit-sso');
+      if (faceit) faceit.focus();
+    } catch (e) { console.error('showSSOOverlay error', e); }
+  }
+  function hideSSOOverlay() {
+    try {
+      const overlay = document.getElementById('sso-overlay');
+      if (!overlay) return;
+      overlay.style.display = 'none';
+      overlay.classList.remove('sso-overlay-active');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.getElementById('menuButton').style.opacity = 1;
+    } catch (e) { console.error('hideSSOOverlay error', e); }
+  }
 
+  // Toggle when menu / hamb is clicked
+  const $menuBtn = document.querySelector('.menu');
+  if ($menuBtn) {
+    $menuBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const overlay = document.getElementById('sso-overlay');
+      if (!overlay) return;
+      if (overlay.style.display === 'flex') hideSSOOverlay(); else showSSOOverlay();
+    });
+  }
+
+  // Close when clicking outside the card
+  const ssoOverlayEl = document.getElementById('sso-overlay');
+  if (ssoOverlayEl) {
+    ssoOverlayEl.addEventListener('click', (e) => { if (e.target === ssoOverlayEl) hideSSOOverlay(); });
+  }
+
+  // Close button
+  const ssoClose = document.querySelector('.sso-close');
+  if (ssoClose) ssoClose.addEventListener('click', hideSSOOverlay);
+
+  // FACEIT SSO button (placeholder)
+  const faceitBtn = document.getElementById('faceit-sso');
+  if (faceitBtn) {
+    faceitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Replace this with a real OAuth redirect when backend is ready
+
+      const remember = document.getElementById('remember-me');
+      if (remember && remember.checked) localStorage.setItem('rememberMe', 'true');
+      else localStorage.removeItem('rememberMe');
+    });
+  }
+
+  const rememberCheckbox = document.getElementById('remember-me');
+  if (rememberCheckbox) {
+    rememberCheckbox.addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      if (checked) localStorage.setItem('rememberMe', 'true'); else localStorage.removeItem('rememberMe');
+    });
+  }
+
+  // Close overlay on Escape
+  document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') hideSSOOverlay(); });
 // Delegate search execution to the implementation provided by searchLogic.js.
 // We use a different local name to avoid any shadowing or equality issues with window.ClickSearch.
 async function runClickSearch(input) {
@@ -658,7 +730,7 @@ function showTypesOfInputs(){
         overlay.style.textAlign = 'left';
 
     const text = document.createElement('div');
-    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>- FACEIT Match ID<br>- Direct Match URL';        
+    text.innerHTML = 'Here are the types of inputs you can use:<br>- FACEIT Team ID <br>- Team Nickname<br>- FACEIT Team URL<br>- FACEIT Match ID<br>- Match URL';        
         text.style.textAlign = 'left';
         overlay.appendChild(text);
 

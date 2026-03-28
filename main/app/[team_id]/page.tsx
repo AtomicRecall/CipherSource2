@@ -20,6 +20,10 @@ export default async function TeamPage({
     redirect(`/search/${team_id}`);
   }
 
+  //connect to the database somewhere here, if connection failed then change a flag to let the web app to not use the database
+  // -1 = user used this page first, so run the database connection check 
+  // 0 = no use database code     user used homepage so dont use database connection check
+  // 1 = yes use database code
   return (
     <div className="w-screen">
       <div className="ml-3 mb-3 mr-3">

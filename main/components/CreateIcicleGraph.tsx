@@ -78,6 +78,7 @@ const computeNodeValue = (node: IcicleData): number => {
 // Helper: sort node.children descending by their computed values, recursively
 const sortIcicleDescending = (node: IcicleData) => {
   if (!node.children || node.children.length === 0) return;
+
   // Custom sort: always put "First" (or "1st") children first, then
   // sort remaining siblings by their computed numeric value (descending).
   const isFirst = (n: IcicleData) => {
@@ -434,7 +435,7 @@ const transformBanDataForIcicle = (
 
   // Sort children descending so larger values appear first (left-to-right)
   sortIcicleDescending(rootNode);
-
+  console.log("OUR ROOT NODE?? ",rootNode);
   return rootNode;
 };
 
