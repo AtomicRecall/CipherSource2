@@ -38,12 +38,15 @@
             <div id="sso-overlay" class="sso-overlay" aria-hidden="true" style="display:none;">
               <div class="sso-card" role="dialog" aria-modal="true" aria-labelledby="sso-title">
                 <button class="sso-close" aria-label="Close SSO">&times;</button>
-                <h2 id="sso-title" style="margin-top: 30px">Log in using </h2>
-                <p id="faceitname"> <image src="images/FACEIT.png" style="height: 30px"></image> FACEIT</p>
-                <p class="sso-desc">When you log in, you will be able to access the picks and bans of your upcoming matches in ESEA League AUTOMATICALLY.</p>
-                <image class="faceit-sso" id="faceitLogin" src="images/LOGINWITHFACEIT.png" onclick="FACEIT.loginWithFaceit()"></image>
-                <div class="remember">
+                <h2 id="sso-title" style="margin-top: 30px">(W.I.P)Log in using </h2>
+                <p id="faceitname"> <image id="faceitlogoo" src="images/FACEIT.png" style="height: 30px"></image> FACEIT</p>
+                <p id="sso-desc" class="sso-desc">When you log in, we will use your faceit profile name to find if you are actively playing in ESEA League, if you are, you will be able to access the picks and bans of your upcoming matches in ESEA League AUTOMATICALLY.</p>
+                <image class="faceit-sso" id="faceitLogin" src="images/LOGINWITHFACEIT.png" ></image> 
+                <div class="remember" style="margin-bottom: 5px;">
                   <input type="checkbox" id="remember-me"/><label for="remember-me"> Remember me</label>
+                </div>
+                <div id="useSteam" class="useSteam" style=" background-color: rgba(37, 150, 190, 0.7); border-radius: 5px;">
+                  <input type="checkbox" id="steam"/><label for="steam"> Use <image src="images/steamlogo.png" style="height: 20px; top:3px; position: relative;"></image> Instead</label>
                 </div>
               </div>
             </div>

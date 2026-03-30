@@ -1,4 +1,74 @@
-
+const useSteamEl = document.getElementById("useSteam");
+if (useSteamEl) {
+  useSteamEl.addEventListener('click', (event) => {
+    const steamCheckbox = document.getElementById("steam");
+    if (!steamCheckbox) return;
+    // If the click came from the checkbox itself or its label, let the browser handle it
+    const clickedInputOrLabel = event.target === steamCheckbox || event.target.closest('label[for="steam"]') || steamCheckbox.contains(event.target);
+    if (clickedInputOrLabel) return;
+    // Simulate a user click so the browser dispatches the proper change event and accessibility events
+    steamCheckbox.click();
+  });
+}
+/*
+async function faceitButtonClick() {
+    try {
+      const response = await FACEIT.loginWithFaceit();
+      console.log("FACEIT login response:", response);
+    } catch (err) {
+      console.error("FACEIT login failed:", err);
+    }
+  };
+  
+  */
+const faceitLoginEl = document.getElementById("faceitLogin");
+if (faceitLoginEl) {
+  faceitLoginEl.onclick = null; /*faceitButtonClick; */
+}
+const steamlLoginEl = document.getElementById("steam");
+if(steamlLoginEl){
+  steamlLoginEl.addEventListener('change', (event) => {
+    const isChecked = event.target.checked;
+    console.log("Steam checkbox changed:", isChecked);
+    const faceitNameEl = document.getElementById('faceitname');
+          document.getElementById("faceitLogin").onmouseout = function() {
+        document.getElementById("faceitLogin").style.transition = "filter 0.5s ease";
+        document.getElementById("faceitLogin").style.filter = "drop-shadow(1px 1px 2px rgba(11, 129, 180, 0))";
+      };
+    if (isChecked) {
+      if (faceitNameEl) {
+        faceitNameEl.innerHTML = '<image id="steamlogoo" src="images/steamlogo.png" style="height: 30px; position: relative; top: 5px;"></image> Steam';
+        // set CSS variable to steam color
+        faceitNameEl.style.setProperty('--pulse-color', 'rgba(11, 130, 180, 1)');
+        console.log('Applied steam pulse color to #faceitname');
+      }
+      document.getElementById("sso-desc").innerText = "When you log in using steam, we will use your steam id to find your faceit profile. If you are actively playing in ESEA League, you will be able to access the picks and bans of your upcoming matches in ESEA League AUTOMATICALLY.";
+      document.getElementById("faceitLogin").src = "images/loginwithsteam.png";
+      document.getElementById("faceitLogin").onmouseover = function() {
+        document.getElementById("faceitLogin").style.transition = "filter 0.5s ease";
+        document.getElementById("faceitLogin").style.filter = "drop-shadow(1px 1px 2px rgba(11, 130, 180, 1))";
+      };
+      document.getElementById("faceitLogin").onclick = function() {
+        console.log("LOGIN WITH STEAM LOL");
+      };
+    } 
+    else {
+      if (faceitNameEl) {
+        faceitNameEl.innerHTML = '<image id="faceitlogoo" src="images/FACEIT.png" style="height: 30px"></image> FACEIT';
+        // reset to default colour
+        faceitNameEl.style.setProperty('--pulse-color', '#FF6900');
+        console.log('Reverted pulse color on #faceitname');
+      }
+      document.getElementById("sso-desc").innerText = "When you log in, we will use your faceit profile name to find if you are actively playing in ESEA League, if you are, you will be able to access the picks and bans of your upcoming matches in ESEA League AUTOMATICALLY.";
+      document.getElementById("faceitLogin").src = "images/LOGINWITHFACEIT.png";
+      document.getElementById("faceitLogin").onmouseover = function() {
+        document.getElementById("faceitLogin").style.transition = "filter 0.5s ease";
+        document.getElementById("faceitLogin").style.filter = "drop-shadow(1px 1px 2px #FF6900)";
+      };
+      document.getElementById("faceitLogin").onclick = null;//faceitButtonClick;
+    } 
+});
+}
 document.getElementById("searchText").addEventListener('keydown', (event) => {
   // Case 1: Shift + Backspace → go to /home
   if (event.shiftKey && event.key === 'Backspace') {
@@ -19,7 +89,7 @@ document.getElementById("searchText").addEventListener('keydown', (event) => {
   }
 });
 // --- SSO overlay helpers: shows/hides the sign-in card when the .menu/.hamb is clicked ---
-  function showSSOOverlay() {
+ function showSSOOverlay() {
     try {
       const overlay = document.getElementById('sso-overlay');
       if (!overlay) return;
