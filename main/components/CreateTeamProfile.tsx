@@ -29,7 +29,7 @@ interface PlayerStats {
   latest_player_name: string;
   count: number;
 }
-let thisSeason = 56;
+let thisSeason = 57;
 const SEASON_LOGO_STANDARD = 30;
 const SEASON_LOGO_SMALL = 23;
 
@@ -1173,11 +1173,11 @@ export default function CreateTeamProfile() {
                 >
                   <Card className="flex-row gap-3 items-center border rounded-lg bg-cumground mt-1 mr-2 flex-shrink-0 min-w-max">
                     <Image
-                      key={`Season ${56}Logo`}
-                      alt={`Season 56Logo`}
+                      key={`Season ${57}Logo`}
+                      alt={`Season 57Logo`}
                       className="ml-2 mb-11"
                       height={40}
-                      src={`images/S${56}logo.png`}
+                      src={`images/S${57}logo.png`}
                       width={40}
                     />
 
