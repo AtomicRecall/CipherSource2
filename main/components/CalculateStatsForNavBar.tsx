@@ -167,7 +167,7 @@ export default function CalculateStats({
                 alt="Team1pfp"
                 size={30}
                 src={
-                  stats.PicksAndBans["payload"].tickets[2].entities[6]
+                  stats.PicksAndBans["payload"].tickets[stats.PicksAndBans["payload"].tickets.length-1].entities[6]
                     .selected_by ==
                   stats.teamMatchData.teams.faction1.faction_id
                     ? stats.teamMatchData.teams.faction1.avatar
@@ -176,7 +176,7 @@ export default function CalculateStats({
               />
             </div>
             <p className="text-[13px] text-black ml-1 mt-1.5 [text-shadow:0px_1px_2px_white] font-bold underline">
-              {stats.PicksAndBans["payload"].tickets[2].entities[6]
+              {stats.PicksAndBans["payload"].tickets[stats.PicksAndBans["payload"].tickets.length-1].entities[6]
                 .selected_by == stats.teamMatchData.teams.faction1.faction_id
                 ? stats.teamMatchData.teams.faction1.name.length > 8
                   ? `${stats.teamMatchData.teams.faction1.name.substring(0, 8)}...`

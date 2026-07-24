@@ -61,10 +61,45 @@ function whatColor(mapname: string): string {
       return "#331900";
     case "de_overpass":
       return "#660066";
+    case "de_cache":
+      return "#00663c";
     default:
       return "#ffffff";
   }
 }
+
+// Function to get the map screenshot used as a fill image (instead of a raw color)
+function getImageForKey(map: string): string | null {
+  switch (map) {
+    case "de_dust2":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/7c17caa9-64a6-4496-8a0b-885e0f038d79_1695819126962.jpeg";
+    case "de_inferno":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/993380de-bb5b-4aa1-ada9-a0c1741dc475_1695819220797.jpeg";
+    case "de_ancient":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/5b844241-5b15-45bf-a304-ad6df63b5ce5_1695819190976.jpeg";
+    case "de_mirage":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/7fb7d725-e44d-4e3c-b557-e1d19b260ab8_1695819144685.jpeg";
+    case "de_nuke":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/7197a969-81e4-4fef-8764-55f46c7cec6e_1695819158849.jpeg";
+    case "de_train":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/225a54ad-c66d-46ee-8ae1-2e4159691ee9_1731582334484.png";
+    case "de_vertigo":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/3bf25224-baee-44c2-bcd4-f1f72d0bbc76_1695819180008.jpeg";
+    case "de_anubis":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/31f01daf-e531-43cf-b949-c094ebc9b3ea_1695819235255.jpeg";
+    case "de_overpass":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/058c4eb3-dac4-441c-a810-70afa0f3022c_1695819170133.jpeg";
+    case "de_cache":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/db483b30-8cbb-488f-8105-0b60c111cc9a_1741030130806.jpeg";
+    default:
+      return null;
+  }
+}
+
+// SVG <pattern> ids must be valid + unique per document. Map names (e.g. "de_dust2")
+// are already safe, but we sanitize defensively in case a caller passes something odd.
+const getMapPatternId = (mapname: string): string =>
+  `icicle-map-image-${mapname.replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
 // Transform ban data into icicle graph format
 // Helper: compute total numeric value for a node (summing children when value is undefined)
@@ -127,12 +162,13 @@ const transformBanDataForIcicle = (
           "de_mirage",
           "de_train",
           "de_overpass",
+          "de_cache"
         ];
 
   // season-specific removals: season 55 removed anubis and vertigo
   if (season === 55) {
     // remove from knownMapNames if present
-    const toRemove = new Set(["de_anubis", "de_vertigo"]);
+    const toRemove = new Set(["de_train", "de_vertigo","de_overpass"]);
 
     for (let i = knownMapNames.length - 1; i >= 0; i--) {
       if (toRemove.has(knownMapNames[i])) knownMapNames.splice(i, 1);
@@ -188,7 +224,7 @@ const transformBanDataForIcicle = (
     } else if (map.count === maxCount) {
       most.push(map);
     }
-    if (map.count < minCount) {
+    if (map.count < minCount && map.count != 0) {
       minCount = map.count;
       least = [map];
     } else if (map.count === minCount) {
@@ -290,9 +326,11 @@ const transformBanDataForIcicle = (
         (map.count > 2 || count < 40
           ? normalizeKey(map.map_name).substring(0, 1).toLocaleUpperCase() +
             normalizeKey(map.map_name).substring(1)
-          : normalizeKey(map.map_name).substring(0, 1).toLocaleUpperCase() +
-            normalizeKey(map.map_name).substring(1, 3)) +
-        " - " +
+          : "") +
+        (map.count > 2 || count < 40
+          ? " - "
+          : "")
+         +
         map.count.toString(),
       name: map.map_name,
       MaxTotal: count,
@@ -320,12 +358,7 @@ const transformBanDataForIcicle = (
 
       if (bo1AEntry && bo1AEntry.count > 0) {
         firstChildren.push({
-          id:
-            (count > 30)
-              ? (bo1AEntry.count >= 2)
-                ? "First A - " + bo1AEntry.count.toString()
-                : "1st A - " + bo1AEntry.count.toString()
-              : "First A - " + bo1AEntry.count.toString(),
+          id:"A - " + bo1AEntry.count.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -334,12 +367,7 @@ const transformBanDataForIcicle = (
       }
       if (bo1BEntry && bo1BEntry.count > 0) {
         firstChildren.push({
-          id:
-            (count > 30)
-              ? (bo1BEntry.count >= 2)
-                ? "First B - " + bo1BEntry.count.toString()
-                : "1st B - " + bo1BEntry.count.toString()
-              : "First B - " + bo1BEntry.count.toString(),
+          id: "B - " + bo1BEntry.count.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -357,10 +385,7 @@ const transformBanDataForIcicle = (
         );
 
         mapNode.children!.push({
-          id:
-            totalFirst >= 2
-              ? "First - " + totalFirst.toString()
-              : "1st - " + totalFirst.toString(),
+          id: "1st - " + totalFirst.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -369,10 +394,7 @@ const transformBanDataForIcicle = (
       } else {
         // no team-specific data — fall back to single First leaf using firstBanEntry
         mapNode.children!.push({
-          id:
-            firstBanEntry.count >= 2
-              ? "First - " + firstBanEntry.count.toString()
-              : "1st - " + firstBanEntry.count.toString(),
+          id: "1st - " + firstBanEntry.count.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -390,10 +412,7 @@ const transformBanDataForIcicle = (
                 ? "Left-Over BO3 - " + secondBanEntry.count.toString()
                 : "LO - BO3 - " + secondBanEntry.count.toString()
               : "Left-Over BO3 - " + secondBanEntry.count.toString()
-            :
-          secondBanEntry.count > 2
-            ? "Second - " + secondBanEntry.count.toString()
-            : "2nd - " + secondBanEntry.count.toString(),
+            :"2nd - " + secondBanEntry.count.toString(),
         name: map.map_name,
         total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
         MaxTotal: count,
@@ -410,9 +429,7 @@ const transformBanDataForIcicle = (
                 ? "Left-Over BO1 - " + thirdBanEntry.count.toString()
                 : "LO BO1- " + thirdBanEntry.count.toString()
               : "Left-Over BO1- " + thirdBanEntry.count.toString()
-            : thirdBanEntry.count >= 2
-              ? "Third - " + thirdBanEntry.count.toString()
-              : "3rd - " + thirdBanEntry.count.toString(),
+            : "3rd - " + thirdBanEntry.count.toString(),
         name: map.map_name,
         total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
         MaxTotal: count,
@@ -496,6 +513,28 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
     season,
     activeMaps,
   );
+
+  // Collect the unique map images actually referenced in this tree, so we only
+  // define the <pattern> elements we need (and don't request images for maps
+  // that aren't in play this season / this data set).
+  const mapImageEntries = useMemo(() => {
+    const seen = new Set<string>();
+    const entries: { name: string; url: string }[] = [];
+
+    const walk = (node: IcicleData) => {
+      if (node.name && !seen.has(node.name)) {
+        seen.add(node.name);
+        const url = getImageForKey(node.name);
+
+        if (url) entries.push({ name: node.name, url });
+      }
+      node.children?.forEach(walk);
+    };
+
+    walk(icicleData);
+
+    return entries;
+  }, [icicleData]);
 
   // scroll/ wheel zoom state
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -765,10 +804,45 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
           height: "100%",
         }}
       >
+        {/* Hidden defs-only SVG. `fill: url(#id)` resolves document-wide, so
+            these patterns can be referenced from the separate <svg> that
+            ResponsiveIcicle renders internally. */}
+        <svg width={0} height={0} style={{ position: "absolute" }} aria-hidden="true">
+          <defs>
+            {mapImageEntries.map(({ name, url }) => (
+              <pattern
+                key={name}
+                id={getMapPatternId(name)}
+                patternUnits="objectBoundingBox"
+                patternContentUnits="objectBoundingBox"
+                width={1}
+                height={1}
+              >
+                <image
+                  href={url}
+                  x={0}
+                  y={0}
+                  width={1}
+                  height={1}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </pattern>
+            ))}
+          </defs>
+        </svg>
         <ResponsiveIcicle
           borderRadius={3}
-          borderWidth={0}
-          colors={(node: any) => whatColor(node.data?.name || "")}
+          borderWidth={-1}
+          colors={(node: any) => {
+            const mapName = node.data?.name || "";
+            const imageUrl = getImageForKey(mapName);
+
+            // fall back to the flat color for anything without a known map image
+            // (the root node, or a map we don't have a screenshot for)
+            return imageUrl
+              ? `url(#${getMapPatternId(mapName)})`
+              : whatColor(mapName);
+          }}
           data={useMemo(() => {
             let d: IcicleData = icicleData;
 
@@ -806,7 +880,6 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
           theme={{
             labels: {
               text: {
-                //bacarrat method: the closer the number is to 9 the bigger the font size, lower than 9 means higher font size, bigger than 9 means smaller font size
                 fontSize: 15,
                 fill: "#ffffff",
                 fontFamily: "Play, sans-serif",

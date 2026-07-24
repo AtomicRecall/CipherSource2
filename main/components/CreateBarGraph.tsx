@@ -20,6 +20,8 @@ function whatColor(mapname: string): string {
       return "#331900";
     case "de_overpass":
       return "#660066";
+    case "de_cache":
+      return "#ebfddb";
     default:
       return "#ffffffff";
   }

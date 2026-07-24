@@ -30,6 +30,8 @@ export function getImageForKey(round: string): string | null {
       return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/3bf25224-baee-44c2-bcd4-f1f72d0bbc76_1695819180008.jpeg";
     case "de_anubis":
       return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/31f01daf-e531-43cf-b949-c094ebc9b3ea_1695819235255.jpeg";
+    case "de_cache":
+      return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/db483b30-8cbb-488f-8105-0b60c111cc9a_1741030130806.jpeg";
     case "de_overpass":
       return "https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/058c4eb3-dac4-441c-a810-70afa0f3022c_1695819170133.jpeg";
     default:
@@ -185,7 +187,7 @@ export default function AddSeasonToMenu(stats: any) {
       case "de_overpass":
         return (
           <div
-            key={`S${stats.stats.matchData.seasonNum} ${stats.stats.matchData.Division} anubis`}
+            key={`S${stats.stats.matchData.seasonNum} ${stats.stats.matchData.Division} overpass`}
           >
             <Image
               alt="Overpass"
@@ -193,6 +195,22 @@ export default function AddSeasonToMenu(stats: any) {
               height={140}
               radius={"none"}
               src="https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/058c4eb3-dac4-441c-a810-70afa0f3022c_1695819170133.jpeg"
+              width={width}
+            />
+          </div>
+        );
+
+      case "de_cache":
+        return (
+          <div
+            key={`S${stats.stats.matchData.seasonNum} ${stats.stats.matchData.Division} cache`}
+          >
+            <Image
+              alt="Cache"
+              className="object-cover"
+              height={140}
+              radius={"none"}
+              src="https://assets.faceit-cdn.net/third_party/games/ce652bd4-0abb-4c90-9936-1133965ca38b/assets/votables/db483b30-8cbb-488f-8105-0b60c111cc9a_1741030130806.jpeg"
               width={width}
             />
           </div>
@@ -266,10 +284,10 @@ export default function AddSeasonToMenu(stats: any) {
     anchorRect: DOMRect | null;
   }) {
     if (typeof document === "undefined" || !anchorRect) return null;
-
+    let size = stats.stats.PicksAndBans.payload.tickets.length;
     const entities =
-      stats?.stats?.PicksAndBans?.payload?.tickets?.[2]?.entities ?? [];
-
+      stats?.stats?.PicksAndBans?.payload?.tickets?.[size-1]?.entities ?? [];
+    
     if (!entities || entities.length === 0) return null;
 
     const initialTop = anchorRect.top + window.scrollY;
@@ -354,7 +372,7 @@ export default function AddSeasonToMenu(stats: any) {
             <div className="text-xs leading-tight flex-1">
               <div className="flex justify-between items-center">
                 <div className={statusClass}>
-                  {(e.round != 7)?(e.status || "").toUpperCase():"LEFT-OVER"}
+                  {(e.round != 7)?(e.status.includes("drop")?"BAN":(e.status || "").toUpperCase()):"LEFT-OVER"}
                 </div>
                 <div className="text-[11px] opacity-90">
                   {(e.guid || "").replace("de_", "").toUpperCase()}
@@ -498,7 +516,7 @@ export default function AddSeasonToMenu(stats: any) {
 
             <div className="flex">
               <div className="flex">
-                {stats.stats.PicksAndBans.payload.tickets[2].entities
+                {stats.stats.PicksAndBans.payload.tickets[stats.stats.PicksAndBans.payload.tickets.length-1].entities
                   .filter((map: any) => map.status === "pick")
                   .map((map: any) => returnImage(map.guid))}
               </div>
@@ -524,7 +542,7 @@ export default function AddSeasonToMenu(stats: any) {
               />
             </div>
 
-            {stats.stats.PicksAndBans.payload.tickets[2].entities
+            {stats.stats.PicksAndBans.payload.tickets[stats.stats.PicksAndBans.payload.tickets.length-1].entities
               .filter((map: any) => map.status === "pick")
               .map((map: any) => returnImage(map.guid))}
           </div>

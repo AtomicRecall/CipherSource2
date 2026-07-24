@@ -641,9 +641,9 @@ export default function CreateTeamProfile() {
           }
 
           // console.log("GOT ALL PLAYED PLAYERS: ",PlayedPlayers);
-          if (season.season_number != thisSeason) {
-            addRosterForSeason(PlayedPlayers, season.season_number);
-          }
+          
+          addRosterForSeason(PlayedPlayers, season.season_number);
+          
           // Remove this season from loading set and update navLoading
           setLoadingSeasonKeys((prev) => {
             const copy = new Set(prev);
@@ -1173,15 +1173,16 @@ export default function CreateTeamProfile() {
                 >
                   <Card className="flex-row gap-3 items-center border rounded-lg bg-cumground mt-1 mr-2 flex-shrink-0 min-w-max">
                     <Image
-                      key={`Season ${57}Logo`}
-                      alt={`Season 57Logo`}
+                      key={`Season ${58}Logo`}
+                      alt={`FACEIT Logo`}
                       className="ml-2 mb-11"
-                      height={40}
-                      src={`images/S${57}logo.png`}
-                      width={40}
+                      radius="none"
+                      height={35}
+                      src={`images/FACEIT.png`}
+                      width={35}
                     />
 
-                    <p className="text-white text-xl mb-11">:</p>
+                    <p className="text-white text-xl mb-11"></p>
                     {data.leagues[0].active_members.map((member: any) => {
                       if (member.game_role.includes("player")) {
                         return (
@@ -1207,6 +1208,50 @@ export default function CreateTeamProfile() {
                             ) : null}
                             <div
                               className="w-12 h-12 rounded-full cursor-pointer 
+                          hover:shadow-[0_0_10px_1px_white] transition duration-200"
+                              onClick={OpenPlayerName(member?.user_name)}
+                            >
+                              <Image
+                                alt={`${member?.user_name} logo`}
+                                className="w-12 h-12 rounded-full hover:shadow-[0_0_8px_white]"
+                                radius="full"
+                                src={
+                                  member?.avatar_img !== ""
+                                    ? member?.avatar_img
+                                    : "/images/DEFAULT.jpg"
+                                }
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+                    })}
+                    <p className="text-white text-xl">SUBS: </p>
+                    {data.leagues[0].active_members.map((member: any) => {
+                      if (member.game_role.includes("substitute")) {
+                        return (
+                          <div
+                            key={member.user_id}
+                            className="flex flex-col items-center mr-4 mb-3"
+                          >
+                            <p className="text text-zinc-200 z-50 text-white [text-shadow:-1px_1px_1px_black] ">
+                              {member?.user_name}
+                            </p>
+                            {member.team_role === "leader" ? (
+                              <div className="">
+                                <div className="-my-4">
+                                  <Image
+                                    className="cursor-pointer rounded-none z-40"
+                                    height={40}
+                                    radius="none"
+                                    src={`/images/CAPTAIN.png`}
+                                    width={40}
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+                            <div
+                              className="w-10 h-10 rounded-full cursor-pointer 
                           hover:shadow-[0_0_10px_1px_white] transition duration-200"
                               onClick={OpenPlayerName(member?.user_name)}
                             >

@@ -174,6 +174,8 @@ function whatColor(mapname: string): string {
       return "#331900";
     case "de_overpass":
       return "#660066";
+    case "de_cache":
+      return "#ebfddb";
     default:
       return "#AAAAAA"; // fallback
   }
@@ -362,7 +364,7 @@ function CreateStatsPage({
       let numPick = 0;
       let numBanThisGame = 0;
 
-      for (const eachPickOrBan of eachBo1.PicksAndBans.payload.tickets[2]
+      for (const eachPickOrBan of eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1]
         .entities) {
         numBanThisGame++;
         if (
@@ -472,14 +474,14 @@ function CreateStatsPage({
               if (secondObject) {
                 secondObject.count += 1;
                 secondObject.wholePickBanData?.push(
-                  eachBo1.PicksAndBans.payload.tickets[2].entities,
+                  eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                 );
               } else {
                 bo1SecondBan.push({
                   map_name: eachPickOrBan.guid,
                   count: 1,
                   wholePickBanData: [
-                    eachBo1.PicksAndBans.payload.tickets[2].entities,
+                    eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                   ],
                 });
               }
@@ -490,14 +492,14 @@ function CreateStatsPage({
               if (mapObj2) {
                 mapObj2.count += 1;
                 mapObj2.wholePickBanData?.push(
-                  eachBo1.PicksAndBans.payload.tickets[2].entities,
+                  eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                 );
               } else {
                 SecondBan.push({
                   map_name: eachPickOrBan.guid,
                   count: 1,
                   wholePickBanData: [
-                    eachBo1.PicksAndBans.payload.tickets[2].entities,
+                    eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                   ],
                 });
               }
@@ -511,14 +513,14 @@ function CreateStatsPage({
               if (thirdObject) {
                 thirdObject.count += 1;
                 thirdObject.wholePickBanData?.push(
-                  eachBo1.PicksAndBans.payload.tickets[2].entities,
+                  eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                 );
               } else {
                 bo1ThirdBan.push({
                   map_name: eachPickOrBan.guid,
                   count: 1,
                   wholePickBanData: [
-                    eachBo1.PicksAndBans.payload.tickets[2].entities,
+                    eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                   ],
                 });
               }
@@ -529,14 +531,14 @@ function CreateStatsPage({
               if (mapObj3) {
                 mapObj3.count += 1;
                 mapObj3.wholePickBanData?.push(
-                  eachBo1.PicksAndBans.payload.tickets[2].entities,
+                  eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                 );
               } else {
                 ThirdBan.push({
                   map_name: eachPickOrBan.guid,
                   count: 1,
                   wholePickBanData: [
-                    eachBo1.PicksAndBans.payload.tickets[2].entities,
+                    eachBo1.PicksAndBans.payload.tickets[eachBo1.PicksAndBans.payload.tickets.length-1].entities,
                   ],
                 });
               }
@@ -683,7 +685,7 @@ function CreateStatsPage({
         let numPickThisGame = 0;
         let numBanThisGame = 0;
 
-        for (const eachPickOrBan of eachBo3.PicksAndBans.payload.tickets[2]
+        for (const eachPickOrBan of eachBo3.PicksAndBans.payload.tickets[eachBo3.PicksAndBans.payload.tickets.length-1]
           .entities) {
           if (eachPickOrBan.status == "pick") {
             numPickThisGame++;
