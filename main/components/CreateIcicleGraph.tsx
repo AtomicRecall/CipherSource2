@@ -375,7 +375,7 @@ const transformBanDataForIcicle = (
         });
       }
 
-      if (firstChildren.length === 1) {
+      if (firstChildren.length === 0) {
         // only one team-specific leaf, add directly
         mapNode.children!.push(firstChildren[0]);
       } else if (firstChildren.length > 1) {
