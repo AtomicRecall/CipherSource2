@@ -323,11 +323,11 @@ const transformBanDataForIcicle = (
     }
     const mapNode: IcicleData = {
       id:
-        (map.count > 2 || count < 40
+        (map.count > 2 || count < 20
           ? normalizeKey(map.map_name).substring(0, 1).toLocaleUpperCase() +
             normalizeKey(map.map_name).substring(1)
           : "") +
-        (map.count > 2 || count < 40
+        (map.count > 2 || count < 20
           ? " - "
           : "")
          +
