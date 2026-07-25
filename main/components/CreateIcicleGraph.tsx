@@ -788,7 +788,7 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
     <div
       ref={wrapperRef}
       style={{
-        height: "150px",
+        height: (type==="bans")?"300px":"150px",
         width: "100%",
         overflow: "auto",
         touchAction: "none",
@@ -880,11 +880,11 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
           theme={{
             labels: {
               text: {
-                fontSize: 15,
+                fontSize: 18,
                 fill: "#ffffff",
                 fontFamily: "Play, sans-serif",
                 fontWeight: "600",
-                filter: "drop-shadow(0 0 3px #ffffff)",
+                filter: "drop-shadow(0 0px 1px #ffffff)",
               },
             },
           }}

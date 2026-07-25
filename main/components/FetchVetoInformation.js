@@ -38,7 +38,7 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
     if (match.status === "finished") {
         let amtOfPicks = 0;
       const stats = await fetchGameStats(match.origin.id, seasonNum, seasonDiv);
-      console.log("DA STATS OR NO?", stats.PicksAndBans["payload"].tickets.length);
+      //console.log("DA STATS OR NO?", stats.PicksAndBans["payload"].tickets.length);
       if(!stats.skipPrinting || shouldFinish){
         
         for (let d = 0; d < stats.PicksAndBans["payload"].tickets[stats.PicksAndBans["payload"].tickets.length-1].entities.length; d++) {
