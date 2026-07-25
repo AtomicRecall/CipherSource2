@@ -17,7 +17,8 @@ interface MapStats {
 }
 
 interface IcicleData {
-  id: string;
+  id: string; // MUST be unique across the whole tree — this is what nivo uses to key/identify nodes
+  label: string; // human-readable text shown on the segment + used to build the tooltip (can repeat)
   name: string;
   total: number;
   MaxTotal: number;
@@ -117,9 +118,9 @@ const sortIcicleDescending = (node: IcicleData) => {
   // Custom sort: always put "First" (or "1st") children first, then
   // sort remaining siblings by their computed numeric value (descending).
   const isFirst = (n: IcicleData) => {
-    if (!n || !n.id) return false;
+    if (!n || !n.label) return false;
 
-    return /^(first|1st)\b/i.test(n.id);
+    return /^(first|1st)\b/i.test(n.label);
   };
 
   node.children.sort((a, b) => {
@@ -294,7 +295,8 @@ const transformBanDataForIcicle = (
   // Create the root node (do NOT set a value on the root; let the layout compute
   // parent sizes from children to avoid double-counting)
   const rootNode: IcicleData = {
-    id: defaultID,
+    id: "root",
+    label: defaultID,
     name: "",
     total: 0,
     MaxTotal: count,
@@ -321,17 +323,20 @@ const transformBanDataForIcicle = (
     if (mapTotalCount === 0 && !hasFirst && !hasSecond && !hasThird) {
       return; // skip this iteration
     }
+    const mapLabel =
+      (map.count > 2 || count < 20
+        ? normalizeKey(map.map_name).substring(0, 1).toLocaleUpperCase() +
+          normalizeKey(map.map_name).substring(1)
+        : "") +
+      (map.count > 2 || count < 20
+        ? " - "
+        : "")
+       +
+      map.count.toString();
+
     const mapNode: IcicleData = {
-      id:
-        (map.count > 2 || count < 20
-          ? normalizeKey(map.map_name).substring(0, 1).toLocaleUpperCase() +
-            normalizeKey(map.map_name).substring(1)
-          : "") +
-        (map.count > 2 || count < 20
-          ? " - "
-          : "")
-         +
-        map.count.toString(),
+      id: map.map_name, // guaranteed unique — each map appears once at this level
+      label: mapLabel,
       name: map.map_name,
       MaxTotal: count,
       total: count,
@@ -358,7 +363,8 @@ const transformBanDataForIcicle = (
 
       if (bo1AEntry && bo1AEntry.count > 0) {
         firstChildren.push({
-          id:"A - " + bo1AEntry.count.toString(),
+          id: map.map_name + "::firstA",
+          label: "A - " + bo1AEntry.count.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -367,7 +373,8 @@ const transformBanDataForIcicle = (
       }
       if (bo1BEntry && bo1BEntry.count > 0) {
         firstChildren.push({
-          id: "B - " + bo1BEntry.count.toString(),
+          id: map.map_name + "::firstB",
+          label: "B - " + bo1BEntry.count.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -385,7 +392,8 @@ const transformBanDataForIcicle = (
         );
 
         mapNode.children!.push({
-          id: "1st - " + totalFirst.toString(),
+          id: map.map_name + "::firstCombined",
+          label: "1st - " + totalFirst.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -394,7 +402,8 @@ const transformBanDataForIcicle = (
       } else {
         // no team-specific data — fall back to single First leaf using firstBanEntry
         mapNode.children!.push({
-          id: "1st - " + firstBanEntry.count.toString(),
+          id: map.map_name + "::first",
+          label: "1st - " + firstBanEntry.count.toString(),
           name: map.map_name,
           total: bannedAll.find((m) => m.map_name === map.map_name)?.count || 0,
           MaxTotal: count,
@@ -405,7 +414,8 @@ const transformBanDataForIcicle = (
 
     if (secondBanEntry && secondBanEntry.count > 0) {
       mapNode.children!.push({
-        id:
+        id: map.map_name + "::second",
+        label:
           type === "picks"
             ? count > 15
               ? secondBanEntry.count >= 2
@@ -422,7 +432,8 @@ const transformBanDataForIcicle = (
 
     if (thirdBanEntry && thirdBanEntry.count > 0) {
       mapNode.children!.push({
-        id:
+        id: map.map_name + "::third",
+        label:
           type === "picks"
             ? count > 15
               ? thirdBanEntry.count >= 2
@@ -864,7 +875,7 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
             return d;
           }, [icicleData, mapScales, pathScales])}
           enableLabels={true}
-          label={(node: any) => node?.id || node?.data?.id || ""}
+          label={(node: any) => node?.data?.label || node?.data?.id || ""}
           labelAlign="center"
           labelRotation={0}
           labelTextColor="#020202ff"
@@ -917,8 +928,8 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
               const header = (() => {
                 const mapFull = node.data?.name || "";
                 const mapDisplay = mapFull ? formatMapName(mapFull) : "";
-                const idParts = (node.id || "").split(" - ");
-                let labelWithoutCount = idParts[0] || node.id || "";
+                const idParts = (node.data?.label || "").split(" - ");
+                let labelWithoutCount = idParts[0] || node.data?.label || "";
                 const countPart =
                   idParts[1] ||
                   (typeof node.value === "number"
@@ -959,14 +970,14 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                   </div>
                   {node.data?.name ? (
                     <>
-                      {node.data.id
+                      {node.data.label
                         .toString()
                         .toUpperCase()
                         .includes(
                           node.data.name.substring(3).toUpperCase(),
-                        ) ? null : node.data.id.toString().includes("A - ") ||
-                        node.data.id.toString().includes("B - ") ? (
-                        node.data.id.toString().includes("A - ") ? (
+                        ) ? null : node.data.label.toString().includes("A - ") ||
+                        node.data.label.toString().includes("B - ") ? (
+                        node.data.label.toString().includes("A - ") ? (
                           <>
                             <span style={{ color: "#ccc" }}>
                               This team 1st {WHATTYPE} {node.data?.name} as the
@@ -976,8 +987,8 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                               style={{ color: "#4CAF50", fontWeight: "bold" }}
                             >
                               {parseInt(
-                                node.data.id.substring(
-                                  node.data.id.indexOf("-") + 1,
+                                node.data.label.substring(
+                                  node.data.label.indexOf("-") + 1,
                                 ),
                               )}
                             </span>
@@ -993,8 +1004,8 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                               style={{ color: "#4CAF50", fontWeight: "bold" }}
                             >
                               {parseInt(
-                                node.data.id.substring(
-                                  node.data.id.indexOf("-") + 1,
+                                node.data.label.substring(
+                                  node.data.label.indexOf("-") + 1,
                                 ),
                               )}
                             </span>
@@ -1009,32 +1020,32 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                               Out of every time {node.data?.name} was{" "}
                               {type === "bans" ? "Banned" : "Picked"},{" "}
                               {node.data?.name} was
-                              {node.data.id
+                              {node.data.label
                                 .toString()
                                 .substring(
                                   0,
-                                  node.data.id.toString().indexOf("-"),
+                                  node.data.label.toString().indexOf("-"),
                                 )
                                 .includes("A") ||
-                              node.data.id
+                              node.data.label
                                 .toString()
                                 .substring(
                                   0,
-                                  node.data.id.toString().indexOf("-"),
+                                  node.data.label.toString().indexOf("-"),
                                 )
                                 .includes("B")
-                                ? `${node.data.id.toString().substring(0, node.data.id.toString().indexOf("-")).includes("A") ? " the 1st" : " the 2nd"} ${type === "bans" ? "ban" : "pick"} of the match`
+                                ? `${node.data.label.toString().substring(0, node.data.label.toString().indexOf("-")).includes("A") ? " the 1st" : " the 2nd"} ${type === "bans" ? "ban" : "pick"} of the match`
                                 : node.hierarchy.pathComponents.length <= 2
                                   ? ` ${type === "bans" ? "Banned" : "Picked"}`
-                                  : ` ${node.data.id.toString().substring(0, node.data.id.toString().indexOf("-"))} ${type === "bans" ? "Banned" : "Picked"}`}{" "}
+                                  : ` ${node.data.label.toString().substring(0, node.data.label.toString().indexOf("-"))} ${type === "bans" ? "Banned" : "Picked"}`}{" "}
                             </span>{" "}
                             <span
                               style={{ color: "#4CAF50", fontWeight: "bold" }}
                             >
                               {(
                                 (parseInt(
-                                  node.data.id.substring(
-                                    node.data.id.indexOf("-") + 1,
+                                  node.data.label.substring(
+                                    node.data.label.indexOf("-") + 1,
                                   ),
                                 ) /
                                   node.data.total) *
@@ -1051,24 +1062,24 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                           <span style={{ color: "#ccc" }}>
                             Out of every {type === "bans" ? "Ban" : "Pick"},{" "}
                             {node.data?.name} was{" "}
-                            {node.data.id
+                            {node.data.label
                               .toString()
                               .substring(
                                 0,
-                                node.data.id.toString().indexOf("-"),
+                                node.data.label.toString().indexOf("-"),
                               )
                               .includes("A") ||
-                            node.data.id
+                            node.data.label
                               .toString()
                               .substring(
                                 0,
-                                node.data.id.toString().indexOf("-"),
+                                node.data.label.toString().indexOf("-"),
                               )
                               .includes("B")
-                              ? `${node.data.id.toString().substring(0, node.data.id.toString().indexOf("-")).includes("A") ? " the 1st" : " the 2nd"} ${type === "bans" ? "ban" : "pick"} of the match`
+                              ? `${node.data.label.toString().substring(0, node.data.label.toString().indexOf("-")).includes("A") ? " the 1st" : " the 2nd"} ${type === "bans" ? "ban" : "pick"} of the match`
                               : node.hierarchy.pathComponents.length <= 2
                                 ? ` ${type === "bans" ? "Banned" : "Picked"}`
-                                : ` ${node.data.id.toString().substring(0, node.data.id.toString().indexOf("-"))} ${type === "bans" ? "Banned" : "Picked"}`}
+                                : ` ${node.data.label.toString().substring(0, node.data.label.toString().indexOf("-"))} ${type === "bans" ? "Banned" : "Picked"}`}
                             :
                           </span>{" "}
                           <span
@@ -1076,8 +1087,8 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                           >
                             {(
                               (parseInt(
-                                node.data.id.substring(
-                                  node.data.id.indexOf("-") + 1,
+                                node.data.label.substring(
+                                  node.data.label.indexOf("-") + 1,
                                 ),
                               ) /
                                 node.data.MaxTotal) *
@@ -1102,7 +1113,7 @@ const CreateIcicleGraph: React.FC<CreateIcicleGraphProps> = ({
                         marginTop: "4px",
                       }}
                     >
-                      of {node.parent.id}
+                      of {node.parent.data?.label || node.parent.id}
                     </div>
                   )}
                 </div>
