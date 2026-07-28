@@ -1191,7 +1191,7 @@ function CreateStatsPage({
                           bo1FirstBanTeamBData={[]}
                           firstBanData={bo3FirstPick}
                           resetZoomRef={undefined}
-                          season={55}
+                          season={58}
                           secondBanData={bo3SecondPick}
                           thirdBanData={LeftOverPick}
                           type={"picks"}
@@ -1222,7 +1222,7 @@ function CreateStatsPage({
                           bo1FirstBanTeamBData={FirstBanTeamB}
                           firstBanData={FirstBan}
                           resetZoomRef={undefined}
-                          season={55}
+                          season={58}
                           secondBanData={SecondBan}
                           thirdBanData={ThirdBan}
                           type={"bans"}
@@ -1280,7 +1280,7 @@ function CreateStatsPage({
                             bo1FirstBanTeamBData={[]}
                             firstBanData={[]}
                             resetZoomRef={bo1ResetZoomRef}
-                            season={55}
+                            season={58}
                             secondBanData={[]}
                             thirdBanData={[]}
                             type={"picks"}
@@ -1312,7 +1312,7 @@ function CreateStatsPage({
                             bo1FirstBanTeamBData={bo1FirstBanTeamB}
                             firstBanData={bo1FirstBan}
                             resetZoomRef={bo1ResetZoomRef}
-                            season={55}
+                            season={58}
                             secondBanData={bo1SecondBan}
                             thirdBanData={bo1ThirdBan}
                             type={"bans"}
@@ -1360,7 +1360,7 @@ function CreateStatsPage({
                           <CreateIcicleGraph
                             bannedData={BO3Picked}
                             firstBanData={bo3FirstPick}
-                            season={55}
+                            season={58}
                             secondBanData={bo3SecondPick}
                             thirdBanData={bo3ThirdPick}
                             type={"picks"}
@@ -1382,7 +1382,7 @@ function CreateStatsPage({
                             bo1FirstBanTeamAData={bo3FirstBanTeamA}
                             bo1FirstBanTeamBData={bo3FirstBanTeamB}
                             firstBanData={bo3FirstBan}
-                            season={55}
+                            season={58}
                             secondBanData={bo3SecondBan}
                             thirdBanData={[]} // BO3 typically only has first and second bans
                             type={"bans"}

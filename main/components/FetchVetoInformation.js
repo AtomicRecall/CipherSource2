@@ -5,6 +5,9 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
  // console.log("CHAMP ID: ", championshipID);
   
   const res = await fetchUpcomingMatches(teamID, championshipID);
+  if(res.status == "404"){
+    return;
+  }
   const fart = await res.json();
  console.log("EVERYTHANG BITCH",fart.payload.items)
   let Stats = [];
@@ -38,8 +41,8 @@ export default async function ObtainVetoInfo(championshipID, teamID, seasonNum, 
     if (match.status === "finished") {
         let amtOfPicks = 0;
       const stats = await fetchGameStats(match.origin.id, seasonNum, seasonDiv);
-      //console.log("DA STATS OR NO?", stats.PicksAndBans["payload"].tickets.length);
-      if(!stats.skipPrinting || shouldFinish){
+      console.log("DA STATS OR NO?", stats);
+      if(stats && (!stats.skipPrinting || shouldFinish)){
         
         for (let d = 0; d < stats.PicksAndBans["payload"].tickets[stats.PicksAndBans["payload"].tickets.length-1].entities.length; d++) {
 
